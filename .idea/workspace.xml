@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="ALL" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="ad3cc4e0-b64c-4907-aa2e-73cb84863f05" name="Default Changelist" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Interface" />
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="GitSEFilterConfiguration">
+    <file-type-list>
+      <filtered-out-file-type name="LOCAL_BRANCH" />
+      <filtered-out-file-type name="REMOTE_BRANCH" />
+      <filtered-out-file-type name="TAG" />
+      <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
+    </file-type-list>
+  </component>
+  <component name="LogFilters">
+    <option name="FILTER_ERRORS" value="false" />
+    <option name="FILTER_WARNINGS" value="false" />
+    <option name="FILTER_INFO" value="true" />
+    <option name="FILTER_DEBUG" value="true" />
+    <option name="CUSTOM_FILTER" />
+  </component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="localRepository" value="D:\DevelopmentTool\Maven\resp" />
+        <option name="mavenHome" value="D:/DevelopmentTool/Maven/apache-maven-3.8.4" />
+        <option name="userSettingsFile" value="D:\DevelopmentTool\Maven\apache-maven-3.8.4\conf\setting.xml" />
+      </MavenGeneralSettings>
+    </option>
+  </component>
+  <component name="MavenRunner">
+    <option name="skipTests" value="true" />
+  </component>
+  <component name="ProjectId" id="2whdAz7aXLEhJmV18tDPXv64Irj" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="DatabaseDriversLRU" value="mysql" />
+    <property name="RequestMappingsPanelOrder0" value="0" />
+    <property name="RequestMappingsPanelOrder1" value="1" />
+    <property name="RequestMappingsPanelWidth0" value="75" />
+    <property name="RequestMappingsPanelWidth1" value="75" />
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="aspect.path.notification.shown" value="true" />
+    <property name="com.intellij.openapi.externalSystem.service.settings.ExternalSystemGroupConfigurable" value="ALL" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../跟卖系统/admin/amazon-track-backend" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.detected.package.tslint" value="true" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="node.js.selected.package.tslint" value="(autodetect)" />
+    <property name="nodejs_package_manager_path" value="npm" />
+    <property name="project.structure.last.edited" value="Libraries" />
+    <property name="project.structure.proportion" value="0.15888889" />
+    <property name="project.structure.side.proportion" value="0.18915343" />
+    <property name="settings.editor.selected.configurable" value="MavenSettings" />
+  </component>
+  <component name="ReactorSettings">
+    <option name="notificationShown" value="true" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CreateClassDialog.RecentsKey">
+      <recent name="com.ds.etl.collect" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="E:\ETL-Product\ETL-TOOL\data-upms\doc\db" />
+      <recent name="E:\ETL-Product\ETL-TOOL\data-upms\src\main\java\com\ds\etl\upms" />
+      <recent name="E:\ETL-Product\ETL-TOOL\data-upms" />
+      <recent name="E:\ETL-Product\ETL-TOOL\data-database\src\main\java\com\ds\etl\database\config\exception" />
+      <recent name="E:\ETL-Product\ETL-TOOL\data-collect-executor\src\main\resources" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="E:\ETL-Product\ETL-TOOL\data-upms\src\main\resources" />
+      <recent name="E:\ETL-Product\ETL-TOOL\data-database\doc\db" />
+      <recent name="E:\ETL-Product\ETL-TOOL\data-upms\doc\db" />
+      <recent name="E:\ETL-Product\ETL-TOOL\data-database\doc\changelog" />
+      <recent name="E:\ETL-Product\ETL-TOOL\data-collect\src\main\resources" />
+    </key>
+    <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
+      <recent name="com.ds.etl.collect.trans" />
+      <recent name="com.ds.etl.collect" />
+    </key>
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="com.ds.etl.collect.config.swagger" />
+      <recent name="com.ds.etl.collect.config.jwt" />
+      <recent name="com.ds.etl.collect.config.web" />
+      <recent name="com.ds.etl.collect.config.mybatis" />
+      <recent name="com.ds.etl.common.utils" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Spring Boot.ETLUpmsApplication">
+    <configuration name="KettleTest.testKettlePlugin" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="data-collect" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.ds.etl.collect.trans.constructor.InitializingStepAware" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.ds.etl.collect.trans" />
+      <option name="MAIN_CLASS_NAME" value="com.ds.etl.collect.trans.KettleTest" />
+      <option name="METHOD_NAME" value="testKettlePlugin" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="TestRasUtil.tests" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="data-upms" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.ds.etl.upms.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.ds.etl.upms" />
+      <option name="MAIN_CLASS_NAME" value="com.ds.etl.upms.TestRasUtil" />
+      <option name="METHOD_NAME" value="tests" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="ETLDatabaseApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" temporary="true" nameIsGenerated="true">
+      <module name="data-database" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.ds.etl.database.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.ds.etl.database.ETLDatabaseApplication" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="SHORTEN_COMMAND_LINE" value="NONE" />
+      <option name="UPDATE_ACTION_UPDATE_POLICY" value="UpdateClassesAndResources" />
+      <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="ETLUpmsApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" temporary="true" nameIsGenerated="true">
+      <module name="data-upms" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.ds.etl.upms.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.ds.etl.upms.ETLUpmsApplication" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="SHORTEN_COMMAND_LINE" value="NONE" />
+      <option name="UPDATE_ACTION_UPDATE_POLICY" value="UpdateClassesAndResources" />
+      <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <list>
+      <item itemvalue="JUnit.KettleTest.testKettlePlugin" />
+      <item itemvalue="JUnit.TestRasUtil.tests" />
+      <item itemvalue="Spring Boot.ETLDatabaseApplication" />
+      <item itemvalue="Spring Boot.ETLUpmsApplication" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Spring Boot.ETLUpmsApplication" />
+        <item itemvalue="JUnit.TestRasUtil.tests" />
+        <item itemvalue="Spring Boot.ETLDatabaseApplication" />
+        <item itemvalue="JUnit.KettleTest.testKettlePlugin" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="ad3cc4e0-b64c-4907-aa2e-73cb84863f05" name="Default Changelist" comment="" />
+      <created>1746497602059</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1746497602059</updated>
+      <workItem from="1746497603698" duration="10847000" />
+      <workItem from="1746516479555" duration="6475000" />
+      <workItem from="1746534625213" duration="6093000" />
+      <workItem from="1746580712088" duration="1822000" />
+      <workItem from="1746630417243" duration="7751000" />
+      <workItem from="1746667135204" duration="2319000" />
+      <workItem from="1746760833683" duration="6027000" />
+      <workItem from="1746790769617" duration="668000" />
+      <workItem from="1746842062968" duration="604000" />
+      <workItem from="1746967277179" duration="674000" />
+      <workItem from="1747013662941" duration="784000" />
+      <workItem from="1747412458340" duration="4085000" />
+      <workItem from="1747637357732" duration="34000" />
+      <workItem from="1747753026042" duration="8682000" />
+      <workItem from="1747791332737" duration="1232000" />
+      <workItem from="1747838518601" duration="9029000" />
+      <workItem from="1747924286240" duration="10234000" />
+      <workItem from="1748005304633" duration="2281000" />
+      <workItem from="1748058657503" duration="1754000" />
+      <workItem from="1748060447937" duration="378000" />
+      <workItem from="1748071260211" duration="5738000" />
+      <workItem from="1748143665112" duration="6807000" />
+      <workItem from="1748162681510" duration="4804000" />
+      <workItem from="1748177236643" duration="4067000" />
+      <workItem from="1748222194146" duration="44000" />
+      <workItem from="1748225466420" duration="14000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>

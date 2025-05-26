@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>ETL-TOOL</artifactId>
+        <groupId>com.ds.etl</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.ds.etl.plugin</groupId>
+    <artifactId>data-collect-plugin</artifactId>
+    <packaging>pom</packaging>
+
+    <modules>
+
+    </modules>
+
+    <properties>
+        <project.revision>9.2.0.0-290</project.revision>
+    </properties>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>org.pentaho</groupId>
+            <artifactId>pentaho-metadata</artifactId>
+            <version>${project.revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>pentaho-kettle</groupId>
+            <artifactId>kettle-core</artifactId>
+            <version>${project.revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>pentaho-kettle</groupId>
+            <artifactId>kettle-engine</artifactId>
+            <version>${project.revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>pentaho-kettle</groupId>
+            <artifactId>kettle-ui-swt</artifactId>
+            <version>${project.revision}</version>
+        </dependency>
+
+    </dependencies>
+
+<!--    <repositories>-->
+<!--        <repository>-->
+<!--            <id>pentaho-omni</id>-->
+<!--            <name>Pentaho Omni Repository</name>-->
+<!--            <url>https://nexus.pentaho.org/content/groups/omni/</url>-->
+<!--        </repository>-->
+<!--    </repositories>-->
+</project>

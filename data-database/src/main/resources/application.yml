@@ -1,0 +1,72 @@
+#修改端口号
+server:
+  port: 8083
+#数据库连结配置
+spring:
+  application:
+    name: etl-database #客户端
+  # 数据源
+  datasource:
+    # mysql
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/etl-database?useSSL=true&useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
+    username: root
+    password: Etl2025
+    # 德鲁伊连接池
+    druid:
+      aop-patterns: com.ds.etl.database.*  #监控SpringBean
+      filters: stat,wall,log4j2     # 底层开启功能，stat（sql监控），wall（防火墙），log4j2日志
+      stat-view-servlet: # 配置监控页功能
+        enabled: true
+        login-username: admin
+        login-password: admin
+        resetEnable: false
+        url-pattern: "/druid/*"
+      web-stat-filter: # 监控web
+        enabled: true
+        urlPattern: /*
+        exclusions: '*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*'
+      filter:
+        stat: # 对上面filters里面的stat的详细配置
+          slow-sql-millis: 1000
+          logSlowSql: true
+          enabled: true
+        wall:
+          enabled: true
+          config:
+            drop-table-allow: false
+      max-active: 300 # 最大连接池数量
+      initial-size: 10 # 连接池初始容量
+      max-wait: 30000 # 获取连接时最大等待时间，单位毫秒
+
+#  #配置redis
+#  redis:
+#    host: 127.0.0.1
+#    port: 6379
+#    #    password: 123456
+#    database: 1 #wechat--数据库默认索引为0
+#    password:
+
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+
+#mybatis-plus配置
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl #mybatis-plus日志实现类
+  global-config:
+    db-config:
+      id-type: auto #主键自增
+      table-prefix: #数据表前缀
+      update-strategy: not_empty #配置mybatis-plus
+
+#日志
+logging:
+  level:
+    web: debug #扫描web
+    com.ds.etl.database: debug
+  pattern:
+    console: "%d %clr(%5p) ---- [%16t] %clr(%-40.40c){cyan} : %m %n"
+
+
