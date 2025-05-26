@@ -47,11 +47,17 @@
 
     </dependencies>
 
-<!--    <repositories>-->
-<!--        <repository>-->
-<!--            <id>pentaho-omni</id>-->
-<!--            <name>Pentaho Omni Repository</name>-->
-<!--            <url>https://nexus.pentaho.org/content/groups/omni/</url>-->
-<!--        </repository>-->
-<!--    </repositories>-->
+    <repositories>
+        <repository>
+            <id>pentaho-public</id>
+            <name>Pentaho Public Repository</name>
+            <url>https://repository.pentaho.org/artifactory/public/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 </project>

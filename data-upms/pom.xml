@@ -44,7 +44,7 @@
             <artifactId>mysql-connector-java</artifactId>
         </dependency>
 
-        <!--德鲁伊连接池-->
+        <!-- druid -->
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>druid-spring-boot-starter</artifactId>

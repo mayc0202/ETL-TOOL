@@ -46,7 +46,7 @@
         <base64.version>1.8</base64.version> <!--base64-->
         <jjwt.version>0.9.0</jjwt.version> <!--jjwt-->
         <jwt.version>3.10.3</jwt.version> <!--jwt-->
-        <druid.version>1.2.1</druid.version><!--druid-->
+        <druid.version>1.2.18</druid.version> <!--druid-->
         <swagger-fox>3.0.0</swagger-fox> <!--swagger3-->
         <knife4j-version>3.0.3</knife4j-version><!--swagger3优化界面-->
         <dubbo.version>2.7.7</dubbo.version> <!--dubbo-->
@@ -70,6 +70,13 @@
                 <artifactId>dubbo-dependencies-zookeeper</artifactId>
                 <version>${zookeeper.version}</version>
                 <type>pom</type>
+            </dependency>
+
+            <!-- druid -->
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>druid-spring-boot-starter</artifactId>
+                <version>${druid.version}</version>
             </dependency>
 
             <!-- mybatis-plus -->
