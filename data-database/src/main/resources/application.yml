@@ -1,5 +1,8 @@
 #修改端口号
 server:
+  servlet:
+    # 设置路径
+    context-path: /etl-database
   port: 8083
 #数据库连结配置
 spring:
@@ -39,17 +42,18 @@ spring:
       initial-size: 10 # 连接池初始容量
       max-wait: 30000 # 获取连接时最大等待时间，单位毫秒
 
-#  #配置redis
-#  redis:
-#    host: 127.0.0.1
-#    port: 6379
-#    #    password: 123456
-#    database: 1 #wechat--数据库默认索引为0
-#    password:
-
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
+
+dubbo:
+  registry:
+    address: nacos://127.0.0.1:8848 # 注册中心
+    check: false # 注册订阅失败时报错
+  config-center:
+    timeout: 25000 # 超时
+  consumer:
+    check: false # 没有服务提供者时报错
 
 #mybatis-plus配置
 mybatis-plus:

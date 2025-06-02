@@ -4,18 +4,19 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.ds.etl</groupId>
+    <groupId>com.etledge</groupId>
     <artifactId>ETL-TOOL</artifactId>
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
 
     <modules>
-        <module>data-collect</module>
+        <module>data-common</module>
+        <module>data-api</module>
+        <module>data-upms</module>
         <module>data-database</module>
+        <module>data-collect</module>
         <module>data-collect-executor</module>
         <module>data-collect-plugin</module>
-        <module>data-common</module>
-        <module>data-upms</module>
     </modules>
 
     <parent>
@@ -27,31 +28,34 @@
 
     <!-- version -->
     <properties>
-        <mysql.version>8.0.20</mysql.version> <!--mysql-->
-        <postgresql.version>42.2.8</postgresql.version> <!--postgresql-->
-        <oracle.version>12.2.0.1.0</oracle.version> <!--oracle-->
-        <sqlserver.version>9.4.1.jre8</sqlserver.version> <!--sqlserver-->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
+        <mysql.version>8.0.20</mysql.version> <!--Mysql-->
+        <postgresql.version>42.2.8</postgresql.version> <!--Postgresql-->
+        <oracle.version>12.2.0.1.0</oracle.version> <!--Oracle-->
+        <sqlserver.version>9.4.1.jre8</sqlserver.version> <!--Sqlserver-->
         <dm.version>8.1.3.62</dm.version> <!--DM8-->
-        <jedis.version>3.6.0</jedis.version> <!--redis-->
-        <redisson.version>3.17.0</redisson.version> <!--redisson-->
+        <jedis.version>3.6.0</jedis.version> <!--Redis-->
+        <redisson.version>3.17.0</redisson.version> <!--Redisson-->
         <kafka.version>3.6.1</kafka.version> <!--Kafka-->
         <rabbitmq.version>2.1.7.RELEASE</rabbitmq.version> <!--RabbitMQ-->
-        <mybatis-plus.version>3.5.0</mybatis-plus.version> <!--mybatis-plus-->
-        <lombok.version>1.18.26</lombok.version> <!--lombok-->
-        <fastjson.version>2.0.20</fastjson.version> <!--fastjson2-->
+        <mybatis-plus.version>3.5.0</mybatis-plus.version> <!--Mybatis-plus-->
+        <lombok.version>1.18.26</lombok.version> <!--Lombok-->
+        <fastjson.version>2.0.20</fastjson.version> <!--Fastjson2-->
         <commons-io.version>2.10.0</commons-io.version> <!--commons-io.version-->
         <commons-collections>3.2.2</commons-collections> <!--commons-collections-->
         <commons-lang3.version>3.12.0</commons-lang3.version> <!--commons-lang3-->
-        <aes-rsa.version>1.56</aes-rsa.version> <!--ase&rsa-->
-        <base64.version>1.8</base64.version> <!--base64-->
-        <jjwt.version>0.9.0</jjwt.version> <!--jjwt-->
-        <jwt.version>3.10.3</jwt.version> <!--jwt-->
-        <druid.version>1.2.18</druid.version> <!--druid-->
-        <swagger-fox>3.0.0</swagger-fox> <!--swagger3-->
-        <knife4j-version>3.0.3</knife4j-version><!--swagger3优化界面-->
-        <dubbo.version>2.7.7</dubbo.version> <!--dubbo-->
-        <zookeeper.version>2.7.7</zookeeper.version> <!--zookeeper-->
-        <hystrix.version>2.2.1.RELEASE</hystrix.version> <!--hystrix-->
+        <aes-rsa.version>1.56</aes-rsa.version> <!--Ase&Rsa-->
+        <base64.version>1.8</base64.version> <!--Base64-->
+        <jjwt.version>0.9.0</jjwt.version> <!--Jjwt-->
+        <jwt.version>3.10.3</jwt.version> <!--Jwt-->
+        <druid.version>1.2.18</druid.version> <!--Druid-->
+        <swagger-fox>3.0.0</swagger-fox> <!--Swagger3-->
+        <knife4j-version>3.0.3</knife4j-version><!--Swagger3-UI面-->
+        <dubbo.version>2.7.7</dubbo.version> <!--Dubbo-->
+        <nacos.version>1.2.1</nacos.version> <!--Nacos-->
+        <hystrix.version>2.2.1.RELEASE</hystrix.version> <!--Hystrix-->
     </properties>
 
     <dependencyManagement>
@@ -64,12 +68,11 @@
                 <version>${dubbo.version}</version>
             </dependency>
 
-            <!-- zookeeper -->
+            <!--nacos-->
             <dependency>
-                <groupId>org.apache.dubbo</groupId>
-                <artifactId>dubbo-dependencies-zookeeper</artifactId>
-                <version>${zookeeper.version}</version>
-                <type>pom</type>
+                <groupId>com.alibaba.nacos</groupId>
+                <artifactId>nacos-client</artifactId>
+                <version>${nacos.version}</version>
             </dependency>
 
             <!-- druid -->

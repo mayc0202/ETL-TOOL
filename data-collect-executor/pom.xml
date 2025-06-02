@@ -4,12 +4,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>ETL-TOOL</artifactId>
-        <groupId>com.ds.etl</groupId>
+        <groupId>com.etledge</groupId>
         <version>1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.ds.etl.executor</groupId>
+    <groupId>com.etledge.executor</groupId>
     <artifactId>data-collect-executor</artifactId>
 
     <properties>

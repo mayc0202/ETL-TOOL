@@ -4,6 +4,16 @@ server:
     context-path: /etl-upms
   port: 8082
 
+security:
+  interceptor:
+    enabled: false
+    exclude-paths:
+      - /login
+      - /public/**
+      - /swagger-ui/**
+      - /v3/api-docs/**
+      - /actuator/health
+
 spring:
   application:
     name: etl-upms #客户端
@@ -51,6 +61,14 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
+
+dubbo:
+  protocol:
+    name: dubbo # dubbo协议
+    port: 20884
+  registry:
+    address: nacos://127.0.0.1:8848 # 注册中心
+    check: false # 关闭注册中心启动时检查
 
 # JWT配置
 jwt:

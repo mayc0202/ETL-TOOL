@@ -1,8 +1,8 @@
 package com.ds.etl.upms;
 
 
-import com.ds.etl.common.utils.AESUtil;
-import com.ds.etl.common.utils.RSAUtil;
+import com.etledge.common.utils.AESUtil;
+import com.etledge.common.utils.RSAUtil;
 import org.junit.Test;
 
 
