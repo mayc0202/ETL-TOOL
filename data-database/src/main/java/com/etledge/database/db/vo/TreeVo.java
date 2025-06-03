@@ -21,5 +21,7 @@ public class TreeVo {
 
     private String type;
 
+    private String icon;
+
     private List<TreeVo> children;
 }

@@ -21,7 +21,7 @@ public interface DbGroupService extends IService<DbGroup> {
      * @param name
      * @return
      */
-    List<TreeVo> list(String name);
+    List<TreeVo> tree(String name);
 
     /**
      * Add group

@@ -24,8 +24,9 @@ public interface Constants {
         Boolean FALSE = false;
     }
 
-    interface TYPE {
+    interface TREE_TYPE {
         String GROUP = "GROUP";
+        String DATABASE_SOURCE = "DATABASE_SOURCE";
     }
 
     /**

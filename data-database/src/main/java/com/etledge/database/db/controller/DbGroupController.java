@@ -27,9 +27,9 @@ public class DbGroupController {
     private DbGroupService dbGroupService;
 
     @ApiOperation(value = "获取数据源分组")
-    @GetMapping("/list.do")
-    public RtnData list(@RequestParam(required = false) String name) {
-        return RtnData.ok(dbGroupService.list(name));
+    @GetMapping("/tree.do")
+    public RtnData tree(@RequestParam(required = false) String name) {
+        return RtnData.ok(dbGroupService.tree(name));
     }
 
     /**

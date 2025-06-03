@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.etledge.database.db.dao.DbDatabaseDao">
+
+    <resultMap type="com.etledge.database.db.entity.DbDatabase" id="DbDatabaseMap">
+        <result property="id" column="id" jdbcType="INTEGER"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="groupId" column="group_id" jdbcType="INTEGER"/>
+        <result property="category" column="category" jdbcType="VARCHAR"/>
+        <result property="type" column="type" jdbcType="VARCHAR"/>
+        <result property="dbHost" column="db_host" jdbcType="VARCHAR"/>
+        <result property="dbPort" column="db_port" jdbcType="VARCHAR"/>
+        <result property="dbName" column="db_name" jdbcType="VARCHAR"/>
+        <result property="dbSchema" column="db_schema" jdbcType="VARCHAR"/>
+        <result property="username" column="username" jdbcType="VARCHAR"/>
+        <result property="password" column="password" jdbcType="VARCHAR"/>
+        <result property="remark" column="remark" jdbcType="VARCHAR"/>
+        <result property="isStatsByDay" column="is_stats_by_day" jdbcType="INTEGER"/>
+        <result property="lastSyncTime" column="last_sync_time" jdbcType="TIMESTAMP"/>
+        <result property="dataSyncCycle" column="data_sync_cycle" jdbcType="INTEGER"/>
+        <result property="deleted" column="deleted" jdbcType="INTEGER"/>
+        <result property="createdBy" column="created_by" jdbcType="VARCHAR"/>
+        <result property="createdTime" column="created_time" jdbcType="TIMESTAMP"/>
+        <result property="updatedBy" column="updated_by" jdbcType="VARCHAR"/>
+        <result property="updatedTime" column="updated_time" jdbcType="TIMESTAMP"/>
+        <result property="properties" column="properties" jdbcType="VARCHAR"/>
+        <result property="extConfig" column="ext_config" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!-- 批量插入 -->
+    <insert id="insertBatch" keyProperty="id" useGeneratedKeys="true">
+        insert into etl-database.db_database(name, group_id, category, type, db_host, db_port, db_name, db_schema, username, password, remark, is_stats_by_day, last_sync_time, data_sync_cycle, deleted, created_by, created_time, updated_by, updated_time, properties, ext_config)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+        (#{entity.name}, #{entity.groupId}, #{entity.category}, #{entity.type}, #{entity.dbHost}, #{entity.dbPort}, #{entity.dbName}, #{entity.dbSchema}, #{entity.username}, #{entity.password}, #{entity.remark}, #{entity.isStatsByDay}, #{entity.lastSyncTime}, #{entity.dataSyncCycle}, #{entity.deleted}, #{entity.createdBy}, #{entity.createdTime}, #{entity.updatedBy}, #{entity.updatedTime}, #{entity.properties}, #{entity.extConfig})
+        </foreach>
+    </insert>
+    <!-- 批量插入或按主键更新 -->
+    <insert id="insertOrUpdateBatch" keyProperty="id" useGeneratedKeys="true">
+        insert into etl-database.db_database(name, group_id, category, type, db_host, db_port, db_name, db_schema, username, password, remark, is_stats_by_day, last_sync_time, data_sync_cycle, deleted, created_by, created_time, updated_by, updated_time, properties, ext_config)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.name}, #{entity.groupId}, #{entity.category}, #{entity.type}, #{entity.dbHost}, #{entity.dbPort}, #{entity.dbName}, #{entity.dbSchema}, #{entity.username}, #{entity.password}, #{entity.remark}, #{entity.isStatsByDay}, #{entity.lastSyncTime}, #{entity.dataSyncCycle}, #{entity.deleted}, #{entity.createdBy}, #{entity.createdTime}, #{entity.updatedBy}, #{entity.updatedTime}, #{entity.properties}, #{entity.extConfig})
+        </foreach>
+        on duplicate key update
+         name = values(name) , group_id = values(group_id) , category = values(category) , type = values(type) , db_host = values(db_host) , db_port = values(db_port) , db_name = values(db_name) , db_schema = values(db_schema) , username = values(username) , password = values(password) , remark = values(remark) , is_stats_by_day = values(is_stats_by_day) , last_sync_time = values(last_sync_time) , data_sync_cycle = values(data_sync_cycle) , deleted = values(deleted) , created_by = values(created_by) , created_time = values(created_time) , updated_by = values(updated_by) , updated_time = values(updated_time) , properties = values(properties) , ext_config = values(ext_config)     </insert>
+
+</mapper>
+

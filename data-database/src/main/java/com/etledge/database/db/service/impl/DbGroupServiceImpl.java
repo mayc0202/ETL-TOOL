@@ -6,7 +6,11 @@ import com.etledge.api.upms.UpmsServer;
 import com.etledge.api.upms.vo.UserVo;
 import com.etledge.common.Constants;
 import com.etledge.database.config.exception.ETLException;
+import com.etledge.database.db.dao.DbBasicDao;
+import com.etledge.database.db.dao.DbDatabaseDao;
 import com.etledge.database.db.dao.DbGroupDao;
+import com.etledge.database.db.entity.DbBasic;
+import com.etledge.database.db.entity.DbDatabase;
 import com.etledge.database.db.entity.DbGroup;
 import com.etledge.database.db.form.DbGroupForm;
 import com.etledge.database.db.service.DbGroupService;
@@ -20,12 +24,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * (DbGroup) ServiceImpl
@@ -36,44 +41,93 @@ import java.util.Objects;
 @Service("dbGroupService")
 public class DbGroupServiceImpl extends ServiceImpl<DbGroupDao, DbGroup> implements DbGroupService {
 
-    @DubboReference(version = "1.0",loadbalance = "roundrobin",cluster = "broadcast", retries = 2)
+    @DubboReference(version = "1.0", loadbalance = "roundrobin", cluster = "broadcast", retries = 2)
     private UpmsServer upmsServer;
+
+    @Autowired
+    private DbBasicDao dbBasicDao;
 
     @Autowired
     private DbGroupDao dbGroupDao;
 
+    @Autowired
+    private DbDatabaseDao dbDatabaseDao;
+
+    private static final Map<String, String> CACHE_ICON = new ConcurrentHashMap<>();
+
+    @PostConstruct
+    private void init() {
+        dbBasicDao.selectList(null).forEach(basic ->
+                CACHE_ICON.put(basic.getName(), basic.getImg())
+        );
+    }
+
     /**
-     * List
+     * Tree
+     *
      * @param name
      * @return
      */
     @Override
-    public List<TreeVo> list(String name) {
-
-        List<TreeVo> result = new ArrayList<>();
-
-        LambdaQueryWrapper<DbGroup> ldq = new LambdaQueryWrapper<>();
-        if (StringUtils.isNotBlank(name)) {
-            ldq.like(DbGroup::getName,name);
-        }
-        ldq.eq(DbGroup::getDeleted,Constants.DELETE_FLAG.FALSE);
-        ldq.orderByDesc(DbGroup::getOrderBy);
+    public List<TreeVo> tree(String name) {
 
         // TODO 调用upms系统接口，解析cooike中的token，获取对应的角色权限，再做筛选
+        UserVo userInfo = getUserInfo();
+        Set<String> roles = userInfo.getRoles();
 
-        List<DbGroup> dbGroups = dbGroupDao.selectList(ldq);
-        if (dbGroups.isEmpty()) {
-            return result;
+        LambdaQueryWrapper<DbGroup> groupQuery = new LambdaQueryWrapper<>();
+        groupQuery.eq(DbGroup::getDeleted, Constants.DELETE_FLAG.FALSE)
+                .orderByDesc(DbGroup::getOrderBy);
+
+        if (StringUtils.isNotBlank(name)) {
+            groupQuery.like(DbGroup::getName, name);
         }
 
-        dbGroups.forEach(g -> {
-            TreeVo vo = new TreeVo();
-            BeanUtils.copyProperties(g,vo);
-            vo.setType("");
-            result.add(vo);
-        });
 
-        return result;
+        List<DbGroup> dbGroups = dbGroupDao.selectList(groupQuery);
+        if (dbGroups.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        Set<Integer> groupIds = dbGroups.stream()
+                .map(DbGroup::getId)
+                .collect(Collectors.toSet());
+
+        List<DbDatabase> databaseList = dbDatabaseDao.selectList(
+                new LambdaQueryWrapper<DbDatabase>()
+                        .eq(DbDatabase::getDeleted, Constants.DELETE_FLAG.FALSE)
+                        .in(DbDatabase::getGroupId, groupIds)
+        );
+
+        // key=groupId,value=List<DbDatabase>
+        Map<Integer, List<DbDatabase>> groupDatabaseMap = databaseList.stream()
+                .collect(Collectors.groupingBy(
+                        DbDatabase::getGroupId,
+                        Collectors.mapping(Function.identity(), Collectors.toList())
+                ));
+
+
+        return dbGroups.stream().map(group -> {
+            TreeVo vo = new TreeVo();
+            BeanUtils.copyProperties(group, vo);
+            vo.setType(Constants.TREE_TYPE.GROUP);
+
+            List<TreeVo> children = Optional.ofNullable(groupDatabaseMap.get(group.getId()))
+                    .orElse(Collections.emptyList())
+                    .stream()
+                    .map(db -> {
+                        TreeVo child = new TreeVo();
+                        child.setId(db.getId());
+                        child.setIcon(CACHE_ICON.get(db.getType())); // deal icon
+                        child.setName(db.getName());
+                        child.setType(Constants.TREE_TYPE.DATABASE_SOURCE);
+                        return child;
+                    })
+                    .collect(Collectors.toList());
+
+            vo.setChildren(children);
+            return vo;
+        }).collect(Collectors.toList());
     }
 
     /**
@@ -85,18 +139,7 @@ public class DbGroupServiceImpl extends ServiceImpl<DbGroupDao, DbGroup> impleme
     @Override
     public void add(DbGroupForm form) {
 
-        // 获取用户信息
-        String token = getToken();
-        UserVo userInfo = null;
-        try {
-            userInfo = upmsServer.getUserInfo(token);
-        } catch (ETLException e) {
-            e.printStackTrace();
-            throw new ETLException(e.getMessage());
-        }
-        if (Objects.isNull(userInfo)) {
-            throw new ETLException("Please verify if the user is empty!");
-        }
+        UserVo userInfo = getUserInfo();
 
         LambdaQueryWrapper<DbGroup> ldq = new LambdaQueryWrapper<>();
         ldq.eq(DbGroup::getName, form.getName())
@@ -124,9 +167,7 @@ public class DbGroupServiceImpl extends ServiceImpl<DbGroupDao, DbGroup> impleme
     @Override
     public void update(DbGroupForm form) {
 
-        if (Objects.isNull(form.getId())) {
-            throw new ETLException("Group name [%s] already exists!");
-        }
+        UserVo userInfo = getUserInfo();
 
         LambdaQueryWrapper<DbGroup> ldq1 = new LambdaQueryWrapper<>();
         ldq1.eq(DbGroup::getId, form.getId())
@@ -146,7 +187,7 @@ public class DbGroupServiceImpl extends ServiceImpl<DbGroupDao, DbGroup> impleme
 
         group.setName(form.getName());
         group.setOrderBy(form.getOrderBy());
-        group.setUpdatedBy("system");
+        group.setUpdatedBy(userInfo.getAccount());
         group.setUpdatedTime(new Date());
         dbGroupDao.updateById(group);
     }
@@ -160,6 +201,8 @@ public class DbGroupServiceImpl extends ServiceImpl<DbGroupDao, DbGroup> impleme
     @Override
     public void delete(Integer id) {
 
+        UserVo userInfo = getUserInfo();
+
         LambdaQueryWrapper<DbGroup> ldq = new LambdaQueryWrapper<>();
         ldq.eq(DbGroup::getId, id)
                 .eq(DbGroup::getDeleted, Constants.DELETE_FLAG.FALSE);
@@ -169,11 +212,34 @@ public class DbGroupServiceImpl extends ServiceImpl<DbGroupDao, DbGroup> impleme
         }
 
         group.setDeleted(Constants.DELETE_FLAG.TRUE);
-        group.setUpdatedBy("system");
+        group.setUpdatedBy(userInfo.getAccount());
         group.setUpdatedTime(new Date());
         dbGroupDao.updateById(group);
     }
 
+    /**
+     * Get user information
+     *
+     * @return
+     */
+    private UserVo getUserInfo() {
+
+        // 获取token
+        String token = getToken();
+        UserVo userInfo = null;
+        try {
+            userInfo = upmsServer.getUserInfo(token);
+        } catch (ETLException e) {
+            e.printStackTrace();
+            throw new ETLException(e.getMessage());
+        }
+
+        if (Objects.isNull(userInfo)) {
+            throw new ETLException("Please verify if the user is empty!");
+        }
+
+        return userInfo;
+    }
 
 
     /**
@@ -188,7 +254,7 @@ public class DbGroupServiceImpl extends ServiceImpl<DbGroupDao, DbGroup> impleme
         String token = "";
         for (Cookie cookie : cookies) {
             if (Constants.ETL_EDGE_TOKEN_CONFIG.ETL_EDGE_TOKEN.equals(cookie.getName())) {
-                token = cookie.getValue().replaceAll(Constants.ETL_EDGE_TOKEN_CONFIG.BEARER_PREFIX,"");
+                token = cookie.getValue().replaceAll(Constants.ETL_EDGE_TOKEN_CONFIG.BEARER_PREFIX, "");
                 break;
             }
         }
