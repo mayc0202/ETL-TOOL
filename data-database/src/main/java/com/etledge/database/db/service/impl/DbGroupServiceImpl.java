@@ -77,7 +77,7 @@ public class DbGroupServiceImpl extends ServiceImpl<DbGroupDao, DbGroup> impleme
 
         LambdaQueryWrapper<DbGroup> groupQuery = new LambdaQueryWrapper<>();
         groupQuery.eq(DbGroup::getDeleted, Constants.DELETE_FLAG.FALSE)
-                .orderByDesc(DbGroup::getOrderBy);
+                .orderByAsc(DbGroup::getOrderBy);
 
         if (StringUtils.isNotBlank(name)) {
             groupQuery.like(DbGroup::getName, name);
