@@ -13,6 +13,9 @@ import java.util.Date;
 @Data
 public class DatabaseVo {
 
+    // 数据源名称
+    private String name;
+
     private Integer groupId;
 
     private String groupName;
@@ -21,8 +24,10 @@ public class DatabaseVo {
 
     private Integer dbId;
 
+    // 数据库名称
     private String dbName;
 
-    private Date createTime;
+    private Date createdTime;
 
+    private String createdTimeTxt;
 }

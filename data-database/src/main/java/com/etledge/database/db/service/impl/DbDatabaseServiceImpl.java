@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.etledge.api.upms.UpmsServer;
 import com.etledge.api.upms.vo.UserVo;
 import com.etledge.common.Constants;
+import com.etledge.common.utils.DataUtil;
 import com.etledge.database.config.exception.ETLException;
 import com.etledge.database.db.dao.DbDatabaseDao;
 import com.etledge.database.db.dao.DbGroupDao;
@@ -89,12 +90,13 @@ public class DbDatabaseServiceImpl extends ServiceImpl<DbDatabaseDao, DbDatabase
         List<DatabaseVo> databaseList = new ArrayList<>();
         page.getRecords().forEach(d -> {
             DatabaseVo vo = new DatabaseVo();
-            BeanUtils.copyProperties(d, vo);
+            vo.setDbId(d.getId());
+            vo.setName(d.getName());
+            vo.setDbName(d.getDbName());
             vo.setDbType(d.getType());
-            String groupName = groupMap.get(vo.getGroupId());
-            if (StringUtils.isNotBlank(groupName)) {
-                vo.setGroupName(groupName);
-            }
+            vo.setGroupId(d.getGroupId());
+            vo.setGroupName(groupMap.getOrDefault(vo.getGroupId(),""));
+            vo.setCreatedTimeTxt(DataUtil.dateConvertString(d.getCreatedTime()));
             databaseList.add(vo);
         });
 

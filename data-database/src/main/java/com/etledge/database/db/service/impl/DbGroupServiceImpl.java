@@ -177,13 +177,8 @@ public class DbGroupServiceImpl extends ServiceImpl<DbGroupDao, DbGroup> impleme
             throw new ETLException("Please verify if the grouping exists!");
         }
 
-        LambdaQueryWrapper<DbGroup> ldq2 = new LambdaQueryWrapper<>();
-        ldq2.eq(DbGroup::getName, form.getName())
-                .eq(DbGroup::getDeleted, Constants.DELETE_FLAG.FALSE);
-        DbGroup dbGroup = dbGroupDao.selectOne(ldq2);
-        if (Objects.nonNull(dbGroup)) {
-            throw new ETLException(String.format("Group name [%s] already exists!", form.getName()));
-        }
+        // verify if the group exists
+        verifyGroupIsExists(form.getName());
 
         group.setName(form.getName());
         group.setOrderBy(form.getOrderBy());
@@ -203,18 +198,41 @@ public class DbGroupServiceImpl extends ServiceImpl<DbGroupDao, DbGroup> impleme
 
         UserVo userInfo = getUserInfo();
 
-        LambdaQueryWrapper<DbGroup> ldq = new LambdaQueryWrapper<>();
-        ldq.eq(DbGroup::getId, id)
+        LambdaQueryWrapper<DbGroup> groupQueryWrapper = new LambdaQueryWrapper<>();
+        groupQueryWrapper.eq(DbGroup::getId, id)
                 .eq(DbGroup::getDeleted, Constants.DELETE_FLAG.FALSE);
-        DbGroup group = dbGroupDao.selectOne(ldq);
+        DbGroup group = dbGroupDao.selectOne(groupQueryWrapper);
         if (Objects.isNull(group)) {
             throw new ETLException("Please verify if the grouping exists!");
         }
+
+        // Verify whether there is a data source under the group
+        LambdaQueryWrapper<DbDatabase> dbQueryWrapper = new LambdaQueryWrapper<>();
 
         group.setDeleted(Constants.DELETE_FLAG.TRUE);
         group.setUpdatedBy(userInfo.getAccount());
         group.setUpdatedTime(new Date());
         dbGroupDao.updateById(group);
+    }
+
+    private DbGroup getDbGroup(Integer id) {
+
+        return null;
+    }
+
+    /**
+     * Verify if the group exists
+     *
+     * @param name
+     */
+    private void verifyGroupIsExists(String name) {
+        LambdaQueryWrapper<DbGroup> ldq2 = new LambdaQueryWrapper<>();
+        ldq2.eq(DbGroup::getName, name)
+                .eq(DbGroup::getDeleted, Constants.DELETE_FLAG.FALSE);
+        DbGroup dbGroup = dbGroupDao.selectOne(ldq2);
+        if (Objects.nonNull(dbGroup)) {
+            throw new ETLException(String.format("Group name [%s] already exists!", name));
+        }
     }
 
     /**
