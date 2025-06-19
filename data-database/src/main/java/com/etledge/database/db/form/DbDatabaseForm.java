@@ -27,6 +27,10 @@ public class DbDatabaseForm {
     @ApiModelProperty(value = "数据源分组", name = "groupId", example = "1")
     private Integer groupId;
 
+    @NotBlank(message = "数据源分层不能为空!")
+    @ApiModelProperty(value = "数据源分层", name = "label", example = "1-业务库BIZ；2-贴源库ODS；3-治理库DW；4-应用库ADS；5-共享库DS")
+    private String label;
+
     @NotBlank(message = "数据库大类不能为空!")
     @ApiModelProperty(value = "数据库大类", name = "category", example = "数据库大类:1-关系型数据库；2-非关系型数据库；3-消息型数据库；4-FTP类型; 5-OSS")
     private String category;

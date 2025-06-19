@@ -20,6 +20,10 @@ public class DatabaseVo {
 
     private String groupName;
 
+    private String label;
+
+    private String labelName;
+
     private String dbType;
 
     private Integer dbId;

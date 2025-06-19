@@ -35,7 +35,7 @@ public class DbBasicServiceImpl extends ServiceImpl<DbBasicDao, DbBasic> impleme
     private DbBasicDao dbBasicDao;
 
     /**
-     * 获取数据库类型集合
+     * query database category list
      *
      * @return
      */
@@ -63,13 +63,24 @@ public class DbBasicServiceImpl extends ServiceImpl<DbBasicDao, DbBasic> impleme
     }
 
     /**
-     * 获取数据库基础信息集合
+     * query database basic list
+     *
+     * @return
+     */
+    @Override
+    public List<DbBasicVo> getDbBasicList() {
+        return dbBasicDao.selectDbBasicList();
+    }
+
+    /**
+     *  query database basic list by category id
      *
      * @param categoryId
      * @return
      */
-    public List<DbBasicVo> getDbBasicList(Integer categoryId) {
-        return dbBasicDao.selectDbBasicList(categoryId);
+    @Override
+    public List<DbBasicVo> getDbBasicListByCategoryId(Integer categoryId) {
+        return dbBasicDao.getDbBasicListByCategoryId(categoryId);
     }
 }
 

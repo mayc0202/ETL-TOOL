@@ -49,7 +49,7 @@ public class DbDatabaseController {
     }
 
     /**
-     * Add database
+     * 添加数据源
      *
      * @return
      */
@@ -57,11 +57,11 @@ public class DbDatabaseController {
     @PostMapping("/add.do")
     public RtnData add(@RequestBody @Valid DbDatabaseForm form) {
         dbDatabaseService.add(form);
-        return RtnData.ok("Database added successfully!");
+        return RtnData.ok("数据源接入成功!");
     }
 
     /**
-     * Edit database
+     * 编辑数据源
      *
      * @return
      */
@@ -69,11 +69,11 @@ public class DbDatabaseController {
     @PutMapping("/update.do")
     public RtnData update(@RequestBody @Valid DbDatabaseForm form) {
         dbDatabaseService.update(form);
-        return RtnData.ok("Database updated successfully!");
+        return RtnData.ok("数据源编辑成功!");
     }
 
     /**
-     * Delete database
+     * 删除数据源
      *
      * @return
      */
@@ -81,7 +81,8 @@ public class DbDatabaseController {
     @PutMapping("/delete.do")
     public RtnData delete(@RequestParam Integer id) {
         dbDatabaseService.delete(id);
-        return RtnData.ok("Database deleted successfully!");
+        return RtnData.ok("数据源删除成功!");
     }
+
 }
 

@@ -15,7 +15,6 @@
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
-        <kettle.revision>9.2.0.0-290</kettle.revision>
     </properties>
 
     <dependencies>
@@ -92,38 +91,20 @@
         <dependency>
             <groupId>org.pentaho</groupId>
             <artifactId>pentaho-metadata</artifactId>
-            <version>${kettle.revision}</version>
         </dependency>
         <dependency>
             <groupId>pentaho-kettle</groupId>
             <artifactId>kettle-core</artifactId>
-            <version>${kettle.revision}</version>
         </dependency>
         <dependency>
             <groupId>pentaho-kettle</groupId>
             <artifactId>kettle-engine</artifactId>
-            <version>${kettle.revision}</version>
         </dependency>
         <dependency>
             <groupId>pentaho-kettle</groupId>
             <artifactId>kettle-ui-swt</artifactId>
-            <version>${kettle.revision}</version>
         </dependency>
 
     </dependencies>
-
-    <repositories>
-        <repository>
-            <id>pentaho-public</id>
-            <name>Pentaho Public Repository</name>
-            <url>https://repository.pentaho.org/artifactory/public/</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
 
 </project>

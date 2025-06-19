@@ -35,11 +35,18 @@ public interface DbBasicDao extends BaseMapper<DbBasic> {
     int insertOrUpdateBatch(@Param("entities") List<DbBasic> entities);
 
     /**
-     * 获取数据库基础信息集合
+     * query database basic list
+     *
+     * @return
+     */
+    List<DbBasicVo> selectDbBasicList();
+
+    /**
+     * query database basic list by category id
      *
      * @param categoryId
      * @return
      */
-    List<DbBasicVo> selectDbBasicList(@Param("category_id") Integer categoryId);
+    List<DbBasicVo> getDbBasicListByCategoryId(@Param("categoryId") Integer categoryId);
 }
 

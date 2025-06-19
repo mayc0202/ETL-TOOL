@@ -2,6 +2,15 @@ package com.etledge.common;
 
 public interface Constants {
 
+    String DICT_FILE = "dict.json";
+
+    /**
+     * 字典标识
+     */
+    interface DICT {
+        String DATA_SOURCE_LAYERING = "data_source_layering"; // 数据源分层
+    }
+
     /**
      * token
      */
@@ -14,7 +23,6 @@ public interface Constants {
         String RATE_LIMIT_PREFIX = "rate_limit:";
         String AUTHORIZATION = "Authorization";
     }
-
 
     /**
      * delete flag

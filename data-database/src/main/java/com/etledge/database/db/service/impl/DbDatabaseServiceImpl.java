@@ -8,6 +8,8 @@ import com.etledge.api.upms.UpmsServer;
 import com.etledge.api.upms.vo.UserVo;
 import com.etledge.common.Constants;
 import com.etledge.common.utils.DataUtil;
+import com.etledge.database.dict.service.DictService;
+import com.etledge.database.dict.service.impl.DictServiceImpl;
 import com.etledge.database.config.exception.ETLException;
 import com.etledge.database.db.dao.DbDatabaseDao;
 import com.etledge.database.db.dao.DbGroupDao;
@@ -20,7 +22,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -48,8 +49,11 @@ public class DbDatabaseServiceImpl extends ServiceImpl<DbDatabaseDao, DbDatabase
     @Autowired
     private DbDatabaseDao dbDatabaseDao;
 
+    @Autowired
+    private DictService dictService;
+
     /**
-     * Get database list
+     * 获取数据源集合
      *
      * @param groupId
      * @param dbId
@@ -61,7 +65,7 @@ public class DbDatabaseServiceImpl extends ServiceImpl<DbDatabaseDao, DbDatabase
     @Override
     public IPage<DatabaseVo> list(Integer groupId, Integer dbId, String name, Integer pageNo, Integer pageSize) {
 
-        // 校验token
+        // TODO 校验token
         UserVo userInfo = getUserInfo();
 
         // 查询出所有分组
@@ -88,17 +92,19 @@ public class DbDatabaseServiceImpl extends ServiceImpl<DbDatabaseDao, DbDatabase
         Page<DbDatabase> page = dbDatabaseDao.selectPage(new Page<>(pageNo, pageSize), ldq);
 
         List<DatabaseVo> databaseList = new ArrayList<>();
-        page.getRecords().forEach(d -> {
+        for (DbDatabase record : page.getRecords()) {
             DatabaseVo vo = new DatabaseVo();
-            vo.setDbId(d.getId());
-            vo.setName(d.getName());
-            vo.setDbName(d.getDbName());
-            vo.setDbType(d.getType());
-            vo.setGroupId(d.getGroupId());
-            vo.setGroupName(groupMap.getOrDefault(vo.getGroupId(),""));
-            vo.setCreatedTimeTxt(DataUtil.dateConvertString(d.getCreatedTime()));
+            vo.setDbId(record.getId());
+            vo.setName(record.getName());
+            vo.setDbName(record.getDbName());
+            vo.setDbType(record.getType());
+            vo.setGroupId(record.getGroupId());
+            vo.setGroupName(groupMap.getOrDefault(vo.getGroupId(), ""));
+            vo.setLabel(record.getLabel());
+            vo.setLabelName(dictService.getDictItemCode(Constants.DICT.DATA_SOURCE_LAYERING, record.getLabel()));
+            vo.setCreatedTimeTxt(DataUtil.dateConvertString(record.getCreatedTime()));
             databaseList.add(vo);
-        });
+        }
 
         Page<DatabaseVo> result = new Page<>();
         result.setRecords(databaseList);
@@ -110,7 +116,7 @@ public class DbDatabaseServiceImpl extends ServiceImpl<DbDatabaseDao, DbDatabase
     }
 
     /**
-     * Add database
+     * 添加数据源
      *
      * @param form
      */
@@ -119,20 +125,20 @@ public class DbDatabaseServiceImpl extends ServiceImpl<DbDatabaseDao, DbDatabase
 
         UserVo userInfo = getUserInfo();
 
-        // verify data source already exists
+        // 校验数据源是否存在
         verifyDataSourceExist(form.getName());
 
         // TODO 密码入库加密
 
         DbDatabase dbDatabase = new DbDatabase();
-        BeanUtils.copyProperties(form,dbDatabase);
+        BeanUtils.copyProperties(form, dbDatabase);
         dbDatabase.setCreatedBy(userInfo.getAccount());
         dbDatabase.setCreatedTime(new Date());
         dbDatabaseDao.insert(dbDatabase);
     }
 
     /**
-     * Update database
+     * 修改数据源
      *
      * @param form
      */
@@ -147,7 +153,7 @@ public class DbDatabaseServiceImpl extends ServiceImpl<DbDatabaseDao, DbDatabase
 
         DbDatabase dbDatabase = dbDatabaseDao.selectOne(ldq1);
         if (Objects.isNull(dbDatabase)) {
-            throw new ETLException("Please verify if the data source exists!");
+            throw new ETLException("请校验数据源是否存在!");
         }
 
         // verify data source already exists
@@ -160,7 +166,7 @@ public class DbDatabaseServiceImpl extends ServiceImpl<DbDatabaseDao, DbDatabase
     }
 
     /**
-     * Delete database
+     * 删除数据源
      *
      * @param id
      */
@@ -175,7 +181,7 @@ public class DbDatabaseServiceImpl extends ServiceImpl<DbDatabaseDao, DbDatabase
 
         DbDatabase dbDatabase = dbDatabaseDao.selectOne(ldq);
         if (Objects.isNull(dbDatabase)) {
-            throw new ETLException("Please verify if the data source exists!");
+            throw new ETLException("请校验数据源是否存在!");
         }
 
         dbDatabase.setDeleted(Constants.DELETE_FLAG.TRUE);
@@ -185,7 +191,7 @@ public class DbDatabaseServiceImpl extends ServiceImpl<DbDatabaseDao, DbDatabase
     }
 
     /**
-     *  Verify data source already exists
+     * 校验苏剧院是否存在
      *
      * @param name
      */
@@ -195,12 +201,12 @@ public class DbDatabaseServiceImpl extends ServiceImpl<DbDatabaseDao, DbDatabase
                 .eq(DbDatabase::getDbName, name);
         DbDatabase database = dbDatabaseDao.selectOne(ldq2);
         if (Objects.nonNull(database)) {
-            throw new ETLException("The data source already exists!");
+            throw new ETLException("数据源已存在!");
         }
     }
 
     /**
-     * Get user information
+     * 获取用户信息
      *
      * @return
      */
@@ -211,20 +217,20 @@ public class DbDatabaseServiceImpl extends ServiceImpl<DbDatabaseDao, DbDatabase
         UserVo userInfo = null;
         try {
             userInfo = upmsServer.getUserInfo(token);
-        } catch (ETLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             throw new ETLException(e.getMessage());
         }
 
         if (Objects.isNull(userInfo)) {
-            throw new ETLException("Please verify if the user is empty!");
+            throw new ETLException("请校验用户信息是否为空!");
         }
 
         return userInfo;
     }
 
     /**
-     * Get token
+     * 获取token
      *
      * @return
      */
@@ -241,7 +247,7 @@ public class DbDatabaseServiceImpl extends ServiceImpl<DbDatabaseDao, DbDatabase
         }
 
         if (StringUtils.isBlank(token)) {
-            throw new ETLException("Please verify if the token is empty!");
+            throw new ETLException("请校验token是否为空!");
         }
 
         return token;

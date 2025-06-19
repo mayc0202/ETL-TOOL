@@ -56,6 +56,8 @@
         <dubbo.version>2.7.7</dubbo.version> <!--Dubbo-->
         <nacos.version>1.2.1</nacos.version> <!--Nacos-->
         <hystrix.version>2.2.1.RELEASE</hystrix.version> <!--Hystrix-->
+        <poi-tl.version>1.12.1</poi-tl.version> <!--poi-tl-->
+        <kettle.revision>9.2.0.0-290</kettle.revision> <!-- kettle -->
     </properties>
 
     <dependencyManagement>
@@ -212,7 +214,48 @@
                 <version>${knife4j-version}</version>
             </dependency>
 
+            <!-- poi-tl -->
+            <dependency>
+                <groupId>com.deepoove</groupId>
+                <artifactId>poi-tl</artifactId>
+                <version>${poi-tl.version}</version>
+            </dependency>
+
+            <!-- Kettle -->
+            <dependency>
+                <groupId>org.pentaho</groupId>
+                <artifactId>pentaho-metadata</artifactId>
+                <version>${kettle.revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>pentaho-kettle</groupId>
+                <artifactId>kettle-core</artifactId>
+                <version>${kettle.revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>pentaho-kettle</groupId>
+                <artifactId>kettle-engine</artifactId>
+                <version>${kettle.revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>pentaho-kettle</groupId>
+                <artifactId>kettle-ui-swt</artifactId>
+                <version>${kettle.revision}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
+    <repositories>
+        <repository>
+            <id>pentaho-public</id>
+            <name>Pentaho Public Repository</name>
+            <url>https://repository.pentaho.org/artifactory/public/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 </project>

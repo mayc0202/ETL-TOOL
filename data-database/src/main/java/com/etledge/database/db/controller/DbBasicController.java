@@ -24,7 +24,7 @@ public class DbBasicController {
     private DbBasicService dbBasicService;
 
     /**
-     * Retrieve the collection of database types
+     * query database category list
      *
      * @return
      */
@@ -35,14 +35,26 @@ public class DbBasicController {
     }
 
     /**
-     * Obtain the basic information set of the database
+     * query database basic list
      *
      * @return
      */
     @ApiOperation(value = "获取数据库基础信息集合")
     @GetMapping("/getDbBasicList.do")
-    public RtnData getDbBasicList(@RequestParam Integer id) {
-        return RtnData.ok(dbBasicService.getDbBasicList(id));
+    public RtnData getDbBasicList() {
+        return RtnData.ok(dbBasicService.getDbBasicList());
+    }
+
+    /**
+     * query database basic list by category id
+     *
+     * @param id
+     * @return
+     */
+    @ApiOperation(value = "根据数据库类别id获取数据库基础信息集合")
+    @GetMapping("/getDbBasicListByCategoryId.do")
+    public RtnData getDbBasicListByCategoryId(@RequestParam Integer id) {
+        return RtnData.ok(dbBasicService.getDbBasicListByCategoryId(id));
     }
 
 }

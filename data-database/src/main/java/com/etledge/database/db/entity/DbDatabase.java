@@ -29,6 +29,9 @@ public class DbDatabase implements Serializable {
 
     private Integer groupId;
 
+    // 数据源分层 1-业务库BIZ；2-贴源库ODS；3-治理库DW；4-应用库ADS；5-共享库DS
+    private String label;
+
     //数据库大类：1-关系型数据库；2-非关系型数据库；3-消息型数据库；4-FTP类型; 5-OSS
     private String category;
 

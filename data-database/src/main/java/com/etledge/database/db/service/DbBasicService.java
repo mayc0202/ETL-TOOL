@@ -16,19 +16,26 @@ import java.util.List;
 public interface DbBasicService extends IService<DbBasic> {
 
     /**
-     * 获取数据库类型集合
+     * query database category list
      *
      * @return
      */
     List<DbCategoryVo> getDbCategoryList();
 
     /**
-     * 获取数据库基础信息集合
+     * query database basic list
+     *
+     * @return
+     */
+    List<DbBasicVo> getDbBasicList();
+
+    /**
+     * query database basic list by category id
      *
      * @param categoryId
      * @return
      */
-    List<DbBasicVo> getDbBasicList(Integer categoryId);
+    List<DbBasicVo> getDbBasicListByCategoryId(Integer categoryId);
 
 }
 

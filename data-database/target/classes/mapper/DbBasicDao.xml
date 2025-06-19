@@ -40,7 +40,7 @@
         updated_time = values(updated_time)
     </insert>
 
-    <!-- 获取数据库基础信息集合 -->
+    <!-- query database basic list -->
     <select id="selectDbBasicList" resultType="com.etledge.database.db.vo.DbBasicVo">
         SELECT
             db.id,
@@ -52,8 +52,22 @@
         FROM
             db_basic AS db
                 LEFT JOIN db_category AS dc ON db.category_id = dc.id
+    </select>
+
+    <!-- query database basic list by category id -->
+    <select id="getDbBasicListByCategoryId" resultType="com.etledge.database.db.vo.DbBasicVo">
+        SELECT
+            db.id,
+            db.NAME,
+            db.img,
+            db.category_id,
+            dc.`name` AS category_name,
+            db.order_by
+        FROM
+            db_basic AS db
+                LEFT JOIN db_category AS dc ON db.category_id = dc.id
         WHERE
-            dc.id = #{category_id}
+            dc.id = #{categoryId}
     </select>
 
 </mapper>
