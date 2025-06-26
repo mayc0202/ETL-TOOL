@@ -191,6 +191,20 @@ public class DbDatabaseServiceImpl extends ServiceImpl<DbDatabaseDao, DbDatabase
     }
 
     /**
+     * 测试连接
+     *
+     * @param form
+     */
+    @Override
+    public void connect(DbDatabaseForm form) {
+        switch (form.getType()) {
+            case Constants.TREE_TYPE.GROUP:
+                break;
+
+        }
+    }
+
+    /**
      * 校验苏剧院是否存在
      *
      * @param name

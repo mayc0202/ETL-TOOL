@@ -85,5 +85,17 @@ public class DbDatabaseController {
     }
 
 
+    /**
+     * 测试连接
+     *
+     * @param form
+     * @return
+     */
+    @ApiOperation(value = "测试链接")
+    @PostMapping("/connect.do")
+    public RtnData connect(@RequestParam @Valid DbDatabaseForm form) {
+        dbDatabaseService.connect(form);
+        return RtnData.ok("连接成功!");
+    }
 }
 

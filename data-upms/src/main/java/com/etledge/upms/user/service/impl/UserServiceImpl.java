@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -168,10 +169,11 @@ public class UserServiceImpl extends ServiceImpl<UserDao, User> implements UserS
     public void afterLoginSuccess(Integer userId, String newToken) {
         String redisKey = Constants.ETL_EDGE_TOKEN_CONFIG.SSO_KEY_PREFIX + userId;
 
-        // 1. 获取旧令牌并加入黑名单
-        String oldToken = redisTemplate.opsForValue().get(redisKey);
-        if (StringUtils.isNotBlank(oldToken)) {
-            try {
+        String oldToken = null;
+        try {
+            // 1. 获取旧令牌并加入黑名单
+            oldToken = redisTemplate.opsForValue().get(redisKey);
+            if (StringUtils.isNotBlank(oldToken)) {
                 Claims oldClaims = jwtConfig.parseToken(oldToken).getBody();
                 long expirationTime = oldClaims.getExpiration().getTime();
                 long currentTime = System.currentTimeMillis();
@@ -186,10 +188,13 @@ public class UserServiceImpl extends ServiceImpl<UserDao, User> implements UserS
                             TimeUnit.MILLISECONDS
                     );
                 }
-            } catch (Exception e) {
-                logger.error("旧Token解析失败: {}", oldToken, e);
-                throw new ETLException("旧Token解析失败:" + e.getMessage());
             }
+        } catch (RedisConnectionFailureException e) {
+            logger.error("Redis连接异常: {}", e.getMessage(), e);
+            throw new ETLException("Redis连接异常:" + e.getMessage());
+        } catch (Exception e) {
+            logger.error("旧Token解析失败: {}", oldToken, e);
+            throw new ETLException("旧Token解析失败:" + e.getMessage());
         }
 
         // 2. 存储新令牌

@@ -12,6 +12,24 @@ public interface Constants {
     }
 
     /**
+     * 数据库类型
+     */
+    interface DataBaseType {
+        String mysql = "MySQL";
+        String oracle = "Oracle";
+        String sqlServer = "SQLServer";
+        String postgresql="PostgreSQL";
+        String dm = "DM8";
+        String starRocks= "StarRocks";
+        String doris = "Doris";
+
+        String kafka = "Kafka";
+
+        String redis = "Redis";
+        String mongoDB = "MongoDB";
+    }
+
+    /**
      * token
      */
     interface ETL_EDGE_TOKEN_CONFIG {

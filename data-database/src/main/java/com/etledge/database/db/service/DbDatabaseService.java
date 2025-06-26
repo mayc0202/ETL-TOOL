@@ -50,5 +50,11 @@ public interface DbDatabaseService extends IService<DbDatabase> {
      */
     void delete(Integer id);
 
+    /**
+     * 测试连接
+     *
+     * @param form
+     */
+    void connect(DbDatabaseForm form);
 }
 
