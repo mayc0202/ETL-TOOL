@@ -6,6 +6,7 @@ import lombok.Data;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @Author: yc
@@ -77,4 +78,49 @@ public class DbDatabaseForm {
 
     @ApiModelProperty(value = "扩展配置", name = "extConfig", example = "...")
     private String extConfig;
+
+    @ApiModelProperty(value = "be地址", name = "beAddress", example = "...")
+    private String beAddress;
+
+    @ApiModelProperty(value = "fe地址", name = "feAddress", example = "127.0.0.1:9030")
+    private String feAddress;
+
+    @ApiModelProperty(value = "连接方式", name = "connectType", example = "127.0.0.1:9030")
+    private String connectType;
+
+//    private Boolean useSSL;
+//
+//    private Boolean useCopy;
+//
+//    private String authWay;
+//
+//    private Integer connectionTimeout;
+//
+//    private Integer readTimeout;
+//
+//    private String controlEncoding;
+//
+//    private String mode;
+//
+//    private String secretId;
+//
+//    private String secretKey;
+//
+//    private String odpsEndpoint;
+//
+//    private String tunnelEndpoint;
+//
+//    private String project;
+//
+//    private String accessKeyId;
+//
+//    private String accessKeySecret;
+//
+//    private List<PropertiesForm> propertiesList;
+//
+//    private String shareType;
+//
+//    private String dbConnectType;
+//
+//    private String accessKey;
 }

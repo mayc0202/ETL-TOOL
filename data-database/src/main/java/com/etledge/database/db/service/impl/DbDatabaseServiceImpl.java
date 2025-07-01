@@ -1,5 +1,6 @@
 package com.etledge.database.db.service.impl;
 
+import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -7,9 +8,12 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.etledge.api.upms.UpmsServer;
 import com.etledge.api.upms.vo.UserVo;
 import com.etledge.common.Constants;
+import com.etledge.common.utils.AESUtil;
 import com.etledge.common.utils.DataUtil;
+import com.etledge.database.db.connector.relationdb.DatabaseConnectorFactory;
+import com.etledge.database.db.connector.relationdb.entity.ConResponse;
+import com.etledge.database.db.form.PropertiesForm;
 import com.etledge.database.dict.service.DictService;
-import com.etledge.database.dict.service.impl.DictServiceImpl;
 import com.etledge.database.config.exception.ETLException;
 import com.etledge.database.db.dao.DbDatabaseDao;
 import com.etledge.database.db.dao.DbGroupDao;
@@ -25,6 +29,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+
+import com.etledge.database.db.connector.relationdb.*;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -94,7 +100,7 @@ public class DbDatabaseServiceImpl extends ServiceImpl<DbDatabaseDao, DbDatabase
         List<DatabaseVo> databaseList = new ArrayList<>();
         for (DbDatabase record : page.getRecords()) {
             DatabaseVo vo = new DatabaseVo();
-            vo.setDbId(record.getId());
+            vo.setId(record.getId());
             vo.setName(record.getName());
             vo.setDbName(record.getDbName());
             vo.setDbType(record.getType());
@@ -198,10 +204,150 @@ public class DbDatabaseServiceImpl extends ServiceImpl<DbDatabaseDao, DbDatabase
     @Override
     public void connect(DbDatabaseForm form) {
         switch (form.getType()) {
-            case Constants.TREE_TYPE.GROUP:
+            case Constants.DATABASE_TYPE.MYSQL:
+            case Constants.DATABASE_TYPE.ORACLE:
+            case Constants.DATABASE_TYPE.POSTGRESQL:
+            case Constants.DATABASE_TYPE.SQL_SERVER:
+            case Constants.DATABASE_TYPE.DM8:
+            case Constants.DATABASE_TYPE.DORIS:
+            case Constants.DATABASE_TYPE.STAR_ROCKS:
+                testDatabaseConnection(form, null);
                 break;
-
+            case Constants.DATABASE_TYPE.REDIS:
+                break;
+            case Constants.DATABASE_TYPE.MONGODB:
+                break;
+            case Constants.DATABASE_TYPE.KAFKA:
+                break;
+            default:
+                throw new ETLException(String.format("未知的数据源类型:%s!", form.getType()));
         }
+    }
+
+    /**
+     * 测试数据库连接
+     *
+     * @param form
+     */
+    public void testDatabaseConnection(DbDatabaseForm form, String properties) {
+
+        // 单独校验schema
+        if ((Constants.DATABASE_TYPE.ORACLE.equals(form.getType()) ||
+                Constants.DATABASE_TYPE.DM8.equals(form.getType())) &&
+                StringUtils.isBlank(form.getDbSchema())) {
+            throw new ETLException("请校验模式(Schema)是否为空!");
+        }
+
+        // 获取连接器
+        AbstractDatabaseConnector connector = DatabaseConnectorFactory.getConnector(form.getType());
+        connector.setDbName(form.getDbName());
+        connector.setUsername(form.getUsername());
+
+        //判断密码是否为空
+        if (StringUtils.isNotBlank(form.getPassword()) || null == form.getId()) {
+            connector.setPassword(form.getPassword());
+        } else {
+            DbDatabase dbDatabase = dbDatabaseDao.selectById(form.getId());
+            String decodePassword = AESUtil.decrypt(dbDatabase.getPassword(), AESUtil.getAesKey());
+            connector.setPassword(decodePassword);
+        }
+
+        connector.setHost(form.getDbHost().trim());
+        if (StringUtils.isNotBlank(form.getDbPort())) {
+            connector.setPort(Integer.parseInt(form.getDbPort()));
+        }
+        connector.setSchema(form.getDbSchema());
+        Map<String, Object> map = new HashMap<>();
+
+        handleProperties(form, map);
+
+        //获取数据库中已保存的properties
+        if (StringUtils.isNotBlank(properties)) {
+            connector.setProperties(properties);
+        } else {
+            connector.setProperties(JSONObject.toJSONString(map));
+        }
+
+        Map<String, Object> extConfigMap = new HashMap<>();
+        setExtConfigProperties(form, extConfigMap);
+        connector.setExtConfig(JSONObject.toJSONString(extConfigMap));
+        connector.setType(form.getType());
+
+        connector.build();
+        ConResponse response = connector.test(form.getType());
+
+        // 判断TestResponse的标识，如果为false，则抛出异常
+        if (!response.getResult()) {
+            throw new ETLException(response.getMsg());
+        }
+    }
+
+    private void handleProperties(DbDatabaseForm form, Map<String, Object> map) {
+//        if (null != form.getUseSSL()) {
+//            map.put("useSSL", form.getUseSSL());
+//        }
+//        if (null != form.getUseCopy()) {
+//            map.put("useCopy", form.getUseCopy());
+//        }
+//        if (StringUtils.isNotBlank(form.getAuthWay())) {
+//            map.put("authWay", form.getAuthWay());
+//        }
+//        if (null != form.getConnectionTimeout()) {
+//            map.put("connectionTimeout", form.getConnectionTimeout());
+//        }
+//        if (null != form.getReadTimeout()) {
+//            map.put("readTimeout", form.getReadTimeout());
+//        }
+//        if (StringUtils.isNotBlank(form.getControlEncoding())) {
+//            map.put("controlEncoding", form.getControlEncoding());
+//        }
+//        if (StringUtils.isNotBlank(form.getMode())) {
+//            map.put("mode", form.getMode());
+//        }
+//        if (StringUtils.isNotBlank(form.getSecretId())) {
+//            map.put("secretId", form.getSecretId());
+//        }
+//        if (StringUtils.isNotBlank(form.getSecretKey())) {
+//            map.put("secretKey", form.getSecretKey());
+//        }
+//        if (StringUtils.isNotBlank(form.getOdpsEndpoint())) {
+//            map.put("odpsEndpoint", form.getOdpsEndpoint());
+//        }
+//        if (StringUtils.isNotBlank(form.getTunnelEndpoint())) {
+//            map.put("tunnelEndpoint", form.getTunnelEndpoint());
+//        }
+//        if (StringUtils.isNotBlank(form.getProject())) {
+//            map.put("project", form.getProject());
+//        }
+//        if (StringUtils.isNotBlank(form.getAccessKeyId())) {
+//            map.put("accessKeyId", form.getAccessKeyId());
+//        }
+//        if (StringUtils.isNotBlank(form.getAccessKeySecret())) {
+//            map.put("accessKeySecret", form.getAccessKeySecret());
+//        }
+//        if (Objects.nonNull(form.getPropertiesList())) {
+//            for (PropertiesForm propertiesForm : form.getPropertiesList()) {
+//                map.put(propertiesForm.getName(), propertiesForm.getValue());
+//            }
+//        }
+    }
+
+    private void setExtConfigProperties(DbDatabaseForm form, Map<String, Object> map) {
+//        if (null != form.getFeAddress()) {
+//            map.put("feAddress", form.getFeAddress());
+//        }
+//        if (null != form.getBeAddress()) {
+//            map.put("beAddress", form.getBeAddress());
+//        }
+//        if (null != form.getConnectType() && !"".equals(form.getConnectType())) {
+//            map.put("connectType", form.getConnectType());
+//        }
+//        if (StringUtils.isNotBlank(form.getAccessKey())) {
+//            map.put("accessKey", form.getAccessKey());
+//        }
+//        if (StringUtils.isNotBlank(form.getSecretKey())) {
+//            map.put("secretKey", form.getSecretKey());
+//        }
     }
 
     /**

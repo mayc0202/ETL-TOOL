@@ -14,19 +14,61 @@ public interface Constants {
     /**
      * 数据库类型
      */
-    interface DataBaseType {
-        String mysql = "MySQL";
-        String oracle = "Oracle";
-        String sqlServer = "SQLServer";
-        String postgresql="PostgreSQL";
-        String dm = "DM8";
-        String starRocks= "StarRocks";
-        String doris = "Doris";
+    interface DATABASE_TYPE {
+        String MYSQL = "MySQL";
+        String ORACLE = "Oracle";
+        String SQL_SERVER = "SQLServer";
+        String POSTGRESQL = "PostgreSQL";
+        String DM8 = "DM8";
+        String STAR_ROCKS = "StarRocks";
+        String DORIS = "Doris";
 
-        String kafka = "Kafka";
+        String REDIS = "Redis";
+        String MONGODB = "MongoDB";
 
-        String redis = "Redis";
-        String mongoDB = "MongoDB";
+        String KAFKA = "Kafka";
+    }
+
+    /**
+     * FTP/FTPS类型
+     */
+    interface FTP_TYPE {
+        String FTP = "Ftp";
+        String FTPS = "FTPS";
+    }
+
+    /**
+     * 数据类型
+     */
+    interface DATA_TYPE {
+        String BLOB = "BLOB";
+        String CLOB = "CLOB";
+        String DATE = "DATE";
+        String TIMESTAMP = "TIMESTAMP";
+        String VARCHAR = "VARCHAR";
+        String INT = "INT";
+        String BIT = "BIT";
+        String CHAR = "CHAR";
+        String TEXT = "TEXT";
+        String REAL = "REAL";
+        String BINARY = "BINARY";
+        String VARBINARY = "VARBINARY";
+        String DOUBLE = "DOUBLE";
+    }
+
+    /**
+     * 数据源扩展配置
+     */
+    interface DATABASE_EXT_CONFIG {
+        String BE_ADDRESS = "beAddress";
+        String FE_ADDRESS = "feAddress";
+        String ORACLE_CONNECT_TYPE = "connectType";
+
+    }
+
+    interface ORACLE_CONNECT_TYPE {
+        String SID = "sid";
+        String SERVICE = "service";
     }
 
     /**
@@ -43,7 +85,7 @@ public interface Constants {
     }
 
     /**
-     * delete flag
+     * 删除标记
      */
     interface DELETE_FLAG {
         Boolean TRUE = true;
@@ -56,7 +98,16 @@ public interface Constants {
     }
 
     /**
-     * plugin code
+     * redis key
      */
-    interface PLUGIN_CODE {}
+    interface REDIS_KEY {
+        String CATEGORY = "category";
+        String DB_BASIC = "db_basic";
+    }
+
+    /**
+     * 组件code
+     */
+    interface PLUGIN_CODE {
+    }
 }
