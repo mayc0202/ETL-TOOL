@@ -183,7 +183,7 @@ public class JdbcUtil {
 
             // Schema 设置（按数据库类型适配）
             if (StringUtils.isNotBlank(dbVo.getDbSchema())) {
-                if (Constants.DATABASE_TYPE.POSTGRESQL.equals(dbVo.getDbType())) {
+                if (Constants.DATABASE_TYPE.POSTGRESQL.equals(dbVo.getType())) {
                     properties.setProperty("currentSchema", dbVo.getDbSchema());
                 } else {
                     properties.setProperty("schema", dbVo.getDbSchema());
@@ -191,8 +191,8 @@ public class JdbcUtil {
             }
 
             // mysql类型数据库设置默认连接参数 按照系统情况修改默认参数
-            if (Constants.DATABASE_TYPE.MYSQL.equals(dbVo.getDbType())
-                    || Constants.DATABASE_TYPE.DORIS.equals(dbVo.getDbType())) {
+            if (Constants.DATABASE_TYPE.MYSQL.equals(dbVo.getType())
+                    || Constants.DATABASE_TYPE.DORIS.equals(dbVo.getType())) {
                 properties.put("useCursorFetch", "true");
                 properties.put("useSSL", "false");
                 properties.put("useUnicode", "yes");
@@ -231,7 +231,7 @@ public class JdbcUtil {
 
             // Schema 设置（按数据库类型适配）
             if (StringUtils.isNotBlank(dbVo.getDbSchema())) {
-                if (Constants.DATABASE_TYPE.POSTGRESQL.equals(dbVo.getDbType())) {
+                if (Constants.DATABASE_TYPE.POSTGRESQL.equals(dbVo.getType())) {
                     properties.setProperty("currentSchema", dbVo.getDbSchema());
                 } else {
                     properties.setProperty("schema", dbVo.getDbSchema());
@@ -239,8 +239,8 @@ public class JdbcUtil {
             }
 
             // mysql类型数据库设置默认连接参数 按照系统情况修改默认参数
-            if (Constants.DATABASE_TYPE.MYSQL.equals(dbVo.getDbType())
-                    || Constants.DATABASE_TYPE.DORIS.equals(dbVo.getDbType())) {
+            if (Constants.DATABASE_TYPE.MYSQL.equals(dbVo.getType())
+                    || Constants.DATABASE_TYPE.DORIS.equals(dbVo.getType())) {
                 properties.put("useSSL", "false");
                 properties.put("useUnicode", "yes");
                 properties.put("characterEncoding", "UTF-8");

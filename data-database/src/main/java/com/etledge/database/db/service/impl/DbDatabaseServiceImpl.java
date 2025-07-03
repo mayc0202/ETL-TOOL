@@ -10,9 +10,9 @@ import com.etledge.api.upms.vo.UserVo;
 import com.etledge.common.Constants;
 import com.etledge.common.utils.AESUtil;
 import com.etledge.common.utils.DataUtil;
+import com.etledge.common.utils.RSAUtil;
 import com.etledge.database.db.connector.relationdb.DatabaseConnectorFactory;
 import com.etledge.database.db.connector.relationdb.entity.ConResponse;
-import com.etledge.database.db.form.PropertiesForm;
 import com.etledge.database.dict.service.DictService;
 import com.etledge.database.config.exception.ETLException;
 import com.etledge.database.db.dao.DbDatabaseDao;
@@ -103,7 +103,7 @@ public class DbDatabaseServiceImpl extends ServiceImpl<DbDatabaseDao, DbDatabase
             vo.setId(record.getId());
             vo.setName(record.getName());
             vo.setDbName(record.getDbName());
-            vo.setDbType(record.getType());
+            vo.setType(record.getType());
             vo.setGroupId(record.getGroupId());
             vo.setGroupName(groupMap.getOrDefault(vo.getGroupId(), ""));
             vo.setLabel(record.getLabel());
@@ -132,12 +132,15 @@ public class DbDatabaseServiceImpl extends ServiceImpl<DbDatabaseDao, DbDatabase
         UserVo userInfo = getUserInfo();
 
         // 校验数据源是否存在
-        verifyDataSourceExist(form.getName());
+        verifyDbNameExisted(form.getName());
 
-        // TODO 密码入库加密
+        // 密码入库加密
+        String decrypt = RSAUtil.decryptByFixedPrivateKeytoString(form.getPassword());
+        String pwd = AESUtil.encrypt(decrypt, AESUtil.getAesKey());
 
         DbDatabase dbDatabase = new DbDatabase();
-        BeanUtils.copyProperties(form, dbDatabase);
+        BeanUtils.copyProperties(form, dbDatabase,"password");
+        dbDatabase.setPassword(pwd);
         dbDatabase.setCreatedBy(userInfo.getAccount());
         dbDatabase.setCreatedTime(new Date());
         dbDatabaseDao.insert(dbDatabase);
@@ -151,21 +154,26 @@ public class DbDatabaseServiceImpl extends ServiceImpl<DbDatabaseDao, DbDatabase
     @Override
     public void update(DbDatabaseForm form) {
 
+        if (Objects.isNull(form.getId())) {
+            throw new ETLException("请校验数据源id是否为空!");
+        }
+
         UserVo userInfo = getUserInfo();
 
-        LambdaQueryWrapper<DbDatabase> ldq1 = new LambdaQueryWrapper<>();
-        ldq1.eq(DbDatabase::getDeleted, Constants.DELETE_FLAG.FALSE)
-                .eq(DbDatabase::getId, form.getId());
-
-        DbDatabase dbDatabase = dbDatabaseDao.selectOne(ldq1);
+        DbDatabase dbDatabase = getDbDatabaseById(form.getId());
         if (Objects.isNull(dbDatabase)) {
             throw new ETLException("请校验数据源是否存在!");
         }
 
         // verify data source already exists
-        verifyDataSourceExist(form.getName());
+        verifyDbNameExisted(form.getName());
 
-        BeanUtils.copyProperties(form, dbDatabase);
+        // 密码入库加密
+        String decrypt = RSAUtil.decryptByFixedPrivateKeytoString(form.getPassword());
+        String pwd = AESUtil.encrypt(decrypt, AESUtil.getAesKey());
+
+        BeanUtils.copyProperties(form, dbDatabase,"password");
+        dbDatabase.setPassword(pwd);
         dbDatabase.setUpdatedBy(userInfo.getAccount());
         dbDatabase.setUpdatedTime(new Date());
         dbDatabaseDao.updateById(dbDatabase);
@@ -179,21 +187,47 @@ public class DbDatabaseServiceImpl extends ServiceImpl<DbDatabaseDao, DbDatabase
     @Override
     public void delete(Integer id) {
 
+        if (Objects.isNull(id)) {
+            throw new ETLException("请校验数据源id是否为空!");
+        }
+
         UserVo userInfo = getUserInfo();
 
-        LambdaQueryWrapper<DbDatabase> ldq = new LambdaQueryWrapper<>();
-        ldq.eq(DbDatabase::getDeleted, Constants.DELETE_FLAG.FALSE)
-                .eq(DbDatabase::getId, id);
-
-        DbDatabase dbDatabase = dbDatabaseDao.selectOne(ldq);
-        if (Objects.isNull(dbDatabase)) {
-            throw new ETLException("请校验数据源是否存在!");
-        }
+        DbDatabase dbDatabase = getDbDatabaseById(id);
 
         dbDatabase.setDeleted(Constants.DELETE_FLAG.TRUE);
         dbDatabase.setUpdatedBy(userInfo.getAccount());
         dbDatabase.setUpdatedTime(new Date());
         dbDatabaseDao.updateById(dbDatabase);
+    }
+
+    /**
+     * 获取数据源详情
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public DatabaseVo detail(Integer id) {
+        if (Objects.isNull(id)) {
+            throw new ETLException("请校验数据源id是否为空!");
+        }
+
+        DbDatabase dbDatabase = getDbDatabaseById(id);
+        DatabaseVo databaseVo = new DatabaseVo();
+        BeanUtils.copyProperties(dbDatabase,databaseVo,"password");
+
+        // AES解密再RSA加密
+        try {
+            String decrypt = AESUtil.decrypt(dbDatabase.getPassword(), AESUtil.getAesKey());
+            String pwd = RSAUtil.encryptByFixedPublicKeytoString(decrypt);
+            databaseVo.setPassword(pwd);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new ETLException(String.format("数据源[%s]密码解密失败!",dbDatabase.getDbName()));
+        }
+
+        return databaseVo;
     }
 
     /**
@@ -245,7 +279,9 @@ public class DbDatabaseServiceImpl extends ServiceImpl<DbDatabaseDao, DbDatabase
 
         //判断密码是否为空
         if (StringUtils.isNotBlank(form.getPassword()) || null == form.getId()) {
-            connector.setPassword(form.getPassword());
+            // 解密
+            String decrypt = RSAUtil.decryptByFixedPrivateKeytoString(form.getPassword());
+            connector.setPassword(decrypt);
         } else {
             DbDatabase dbDatabase = dbDatabaseDao.selectById(form.getId());
             String decodePassword = AESUtil.decrypt(dbDatabase.getPassword(), AESUtil.getAesKey());
@@ -351,18 +387,36 @@ public class DbDatabaseServiceImpl extends ServiceImpl<DbDatabaseDao, DbDatabase
     }
 
     /**
-     * 校验苏剧院是否存在
+     * 校验数据源名称是否存在
      *
      * @param name
      */
-    private void verifyDataSourceExist(String name) {
-        LambdaQueryWrapper<DbDatabase> ldq2 = new LambdaQueryWrapper<>();
-        ldq2.eq(DbDatabase::getDeleted, Constants.DELETE_FLAG.FALSE)
-                .eq(DbDatabase::getDbName, name);
-        DbDatabase database = dbDatabaseDao.selectOne(ldq2);
+    private void verifyDbNameExisted(String name) {
+        LambdaQueryWrapper<DbDatabase> ldq = new LambdaQueryWrapper<>();
+        ldq.eq(DbDatabase::getDbName, name)
+                .eq(DbDatabase::getDeleted, Constants.DELETE_FLAG.FALSE);
+        DbDatabase database = dbDatabaseDao.selectOne(ldq);
         if (Objects.nonNull(database)) {
             throw new ETLException("数据源已存在!");
         }
+    }
+
+    /**
+     * 根据id获取数据源信息
+     *
+     * @param id
+     * @return
+     */
+    private DbDatabase getDbDatabaseById(Integer id) {
+        LambdaQueryWrapper<DbDatabase> ldq = new LambdaQueryWrapper<>();
+        ldq.eq(DbDatabase::getId, id)
+                .eq(DbDatabase::getDeleted, Constants.DELETE_FLAG.FALSE);
+        DbDatabase database = dbDatabaseDao.selectOne(ldq);
+        if (Objects.isNull(database)) {
+            throw new ETLException("请校验数据源是否已存在!");
+        }
+
+        return database;
     }
 
     /**

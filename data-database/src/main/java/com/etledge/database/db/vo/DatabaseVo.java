@@ -1,5 +1,6 @@
 package com.etledge.database.db.vo;
 
+import io.swagger.models.auth.In;
 import lombok.Data;
 
 import java.util.Date;
@@ -24,11 +25,16 @@ public class DatabaseVo {
 
     private String groupName;
 
+    // 数据源分层 1-业务库BIZ；2-贴源库ODS；3-治理库DW；4-应用库ADS；5-共享库DS
     private String label;
 
     private String labelName;
 
-    private String dbType;
+    //数据库大类：1-关系型数据库；2-非关系型数据库；3-消息型数据库；4-FTP类型; 5-OSS
+    private String category;
+
+    //数据库类型：MySQL、Oracle、SQLServer、PostgreSQL等
+    private String type;
 
     /**
      * 主机地址

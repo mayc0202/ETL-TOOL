@@ -47,7 +47,7 @@ public class SwaggerConfig {
                 // 将api的元信息设置为包含在json ResourceListing响应中。
                 .apiInfo(apiInfo())
                 // 接口调试地址
-                .host("http://localhost:8084")
+                .host("http://localhost:8083")
                 // 选择哪些接口作为swagger的doc发布
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("com.etledge.database"))

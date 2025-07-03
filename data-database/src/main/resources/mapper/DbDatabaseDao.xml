@@ -28,23 +28,5 @@
         <result property="extConfig" column="ext_config" jdbcType="VARCHAR"/>
     </resultMap>
 
-    <!-- 批量插入 -->
-    <insert id="insertBatch" keyProperty="id" useGeneratedKeys="true">
-        insert into etl-database.db_database(name, group_id, category, type, db_host, db_port, db_name, db_schema, username, password, remark, is_stats_by_day, last_sync_time, data_sync_cycle, deleted, created_by, created_time, updated_by, updated_time, properties, ext_config)
-        values
-        <foreach collection="entities" item="entity" separator=",">
-        (#{entity.name}, #{entity.groupId}, #{entity.category}, #{entity.type}, #{entity.dbHost}, #{entity.dbPort}, #{entity.dbName}, #{entity.dbSchema}, #{entity.username}, #{entity.password}, #{entity.remark}, #{entity.isStatsByDay}, #{entity.lastSyncTime}, #{entity.dataSyncCycle}, #{entity.deleted}, #{entity.createdBy}, #{entity.createdTime}, #{entity.updatedBy}, #{entity.updatedTime}, #{entity.properties}, #{entity.extConfig})
-        </foreach>
-    </insert>
-    <!-- 批量插入或按主键更新 -->
-    <insert id="insertOrUpdateBatch" keyProperty="id" useGeneratedKeys="true">
-        insert into etl-database.db_database(name, group_id, category, type, db_host, db_port, db_name, db_schema, username, password, remark, is_stats_by_day, last_sync_time, data_sync_cycle, deleted, created_by, created_time, updated_by, updated_time, properties, ext_config)
-        values
-        <foreach collection="entities" item="entity" separator=",">
-            (#{entity.name}, #{entity.groupId}, #{entity.category}, #{entity.type}, #{entity.dbHost}, #{entity.dbPort}, #{entity.dbName}, #{entity.dbSchema}, #{entity.username}, #{entity.password}, #{entity.remark}, #{entity.isStatsByDay}, #{entity.lastSyncTime}, #{entity.dataSyncCycle}, #{entity.deleted}, #{entity.createdBy}, #{entity.createdTime}, #{entity.updatedBy}, #{entity.updatedTime}, #{entity.properties}, #{entity.extConfig})
-        </foreach>
-        on duplicate key update
-         name = values(name) , group_id = values(group_id) , category = values(category) , type = values(type) , db_host = values(db_host) , db_port = values(db_port) , db_name = values(db_name) , db_schema = values(db_schema) , username = values(username) , password = values(password) , remark = values(remark) , is_stats_by_day = values(is_stats_by_day) , last_sync_time = values(last_sync_time) , data_sync_cycle = values(data_sync_cycle) , deleted = values(deleted) , created_by = values(created_by) , created_time = values(created_time) , updated_by = values(updated_by) , updated_time = values(updated_time) , properties = values(properties) , ext_config = values(ext_config)     </insert>
-
 </mapper>
 

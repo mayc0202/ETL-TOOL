@@ -31,7 +31,7 @@ spring:
         exclusions: '*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*'
       filter:
         stat: # 对上面filters里面的stat的详细配置
-          slow-sql-millis: 1000
+          slow-sql-millis: 10000
           logSlowSql: true
           enabled: true
         wall:
@@ -47,13 +47,24 @@ spring:
       matching-strategy: ant_path_matcher
 
 dubbo:
+  application:
+    name: etl-database
+    qos-enable: false
   registry:
     address: nacos://127.0.0.1:8848 # 注册中心
     check: false # 注册订阅失败时报错
+    timeout: 3000  # 注册中心超时时间（毫秒）
+    parameters:
+        nacos.retry: 1  # 重试次数
   config-center:
     timeout: 25000 # 超时
   consumer:
     check: false # 没有服务提供者时报错
+  # 禁用不需要的模块
+  metrics:
+    enable: false
+  monitor:
+    protocol: none
 
 #mybatis-plus配置
 mybatis-plus:
@@ -70,6 +81,7 @@ logging:
   level:
     web: debug #扫描web
     com.ds.etl.database: debug
+    org.apache.dubbo.spring.extension.SpringExtensionFactory: WARN
   pattern:
     console: "%d %clr(%5p) ---- [%16t] %clr(%-40.40c){cyan} : %m %n"
 

@@ -147,7 +147,7 @@ public abstract class AbstractDatabaseConnector {
         DatabaseVo dbVo = new DatabaseVo();
         dbVo.setUsername(username);
         dbVo.setPassword(password);
-        dbVo.setDbType(type);
+        dbVo.setType(type);
         dbVo.setDbSchema(schema);
         dbVo.setProperties(properties);
         dbVo.setExtConfig(extConfig);

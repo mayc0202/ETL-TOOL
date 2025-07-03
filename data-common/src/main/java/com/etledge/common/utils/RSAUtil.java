@@ -111,10 +111,10 @@ public final class RSAUtil {
         try {
             return new String(RSAConfig.decryptByPrivateKey(data, fixedPrivateKey));
         } catch (BadPaddingException e) {
-            log.error("Decryption failed: Please check if the key matches | if the data is complete ");
-            throw new RuntimeException("Decryption failed, please confirm using the correct private key ");
+            log.error("解密失败：请检查密钥是否匹配或者数据是否完整!");
+            throw new RuntimeException("解密失败，请使用正确的私钥进行解密!");
         } catch (GeneralSecurityException e) {
-            throw new RuntimeException("Security handling exceptions ", e);
+            throw new RuntimeException("安全处理异常:", e);
         }
     }
 }

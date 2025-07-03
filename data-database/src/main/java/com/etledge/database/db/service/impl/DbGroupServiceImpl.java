@@ -57,7 +57,7 @@ public class DbGroupServiceImpl extends ServiceImpl<DbGroupDao, DbGroup> impleme
 
     @PostConstruct
     private void init() {
-        dbBasicDao.selectList(null).forEach(basic ->
+        dbBasicDao.selectDbBasicList().forEach(basic ->
                 CACHE_ICON.put(basic.getName(), basic.getImg())
         );
     }

@@ -11,6 +11,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.Objects;
 
 /**
  * (DbDatabase)表控制层
@@ -49,27 +50,20 @@ public class DbDatabaseController {
     }
 
     /**
-     * 添加数据源
+     * 保存数据源配置
      *
      * @return
      */
-    @ApiOperation(value = "添加数据源")
-    @PostMapping("/add.do")
-    public RtnData add(@RequestBody @Valid DbDatabaseForm form) {
-        dbDatabaseService.add(form);
-        return RtnData.ok("数据源接入成功!");
-    }
-
-    /**
-     * 编辑数据源
-     *
-     * @return
-     */
-    @ApiOperation(value = "编辑数据源")
-    @PutMapping("/update.do")
-    public RtnData update(@RequestBody @Valid DbDatabaseForm form) {
-        dbDatabaseService.update(form);
-        return RtnData.ok("数据源编辑成功!");
+    @ApiOperation(value = "保存数据源配置")
+    @PostMapping("/save.do")
+    public RtnData save(@RequestBody @Valid DbDatabaseForm form) {
+        if (Objects.isNull(form.getId())) {
+            dbDatabaseService.add(form);
+            return RtnData.ok("数据源接入成功!");
+        } else {
+            dbDatabaseService.update(form);
+            return RtnData.ok("数据源编辑成功!");
+        }
     }
 
     /**
@@ -84,6 +78,17 @@ public class DbDatabaseController {
         return RtnData.ok("数据源删除成功!");
     }
 
+    /**
+     * 获取数据源详情
+     *
+     * @param id
+     * @return
+     */
+    @ApiOperation(value = "获取数据源详情")
+    @GetMapping("/detail.do")
+    public RtnData detail(@RequestParam Integer id) {
+        return RtnData.ok(dbDatabaseService.detail(id));
+    }
 
     /**
      * 测试连接
@@ -93,7 +98,7 @@ public class DbDatabaseController {
      */
     @ApiOperation(value = "测试链接")
     @PostMapping("/connect.do")
-    public RtnData connect(@RequestParam @Valid DbDatabaseForm form) {
+    public RtnData connect(@RequestBody @Valid DbDatabaseForm form) {
         dbDatabaseService.connect(form);
         return RtnData.ok("连接成功!");
     }
