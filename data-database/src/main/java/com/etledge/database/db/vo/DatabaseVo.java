@@ -72,6 +72,16 @@ public class DatabaseVo {
     private String remark;
 
     /**
+     * be地址
+     */
+    private String beAddress;
+
+    /**
+     * fe地址
+     */
+    private String feAddress;
+
+    /**
      * 配置
      */
     private String properties;

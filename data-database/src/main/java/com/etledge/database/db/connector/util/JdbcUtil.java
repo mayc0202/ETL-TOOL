@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 
@@ -19,31 +20,25 @@ import java.util.Properties;
  */
 public class JdbcUtil {
 
-    private static Logger logger = LoggerFactory.getLogger(JdbcUtil.class);
+    private static final Logger logger = LoggerFactory.getLogger(JdbcUtil.class);
 
+    // URL格式常量
     private static final String MYSQL_URL_FORMAT = "jdbc:mysql://%s:%s/%s";
-
     private static final String ORACLE_SERVICE_URL_FORMAT = "jdbc:oracle:thin:@//%s:%s/%s";
-
     private static final String ORACLE_SID_URL_FORMAT = "jdbc:oracle:thin:@%s:%s:%s";
-
     private static final String POSTGRESQL_URL_FORMAT = "jdbc:postgresql://%s:%s/%s";
-
     private static final String SQLSERVER_URL_FORMAT = "jdbc:sqlserver://%s:%s;DatabaseName=%s";
-
     private static final String DM_URL_FORMAT = "jdbc:dm://%s:%s/%s";
 
-    private static final String OPENGAUSS_URL_FORMAT = "jdbc:postgresql://%s:%s/%s";
-
+    // 驱动类名常量
     private static final String MYSQL_DRIVER = "com.mysql.jdbc.Driver";
-
     private static final String ORACLE_DRIVER = "oracle.jdbc.driver.OracleDriver";
-
     private static final String POSTGRESQL_DRIVER = "org.postgresql.Driver";
-
     private static final String SQLSERVER_DRIVER = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
-
     private static final String DM_DRIVER = "dm.jdbc.driver.DmDriver";
+
+    // 连接超时时间（秒）
+    private static final int LOGIN_TIMEOUT = 10;
 
 
     /**
@@ -57,29 +52,31 @@ public class JdbcUtil {
      * @return
      */
     public static String getUrl(String type, String host, String port, String dbName, String extConfig) {
-        String jdbcUrl = null;
+        switch (type) {
+            case Constants.DATABASE_TYPE.MYSQL:
+            case Constants.DATABASE_TYPE.DORIS:
+            case Constants.DATABASE_TYPE.STAR_ROCKS:
+                return String.format(MYSQL_URL_FORMAT, host, port, dbName);
 
-        if (Constants.DATABASE_TYPE.MYSQL.equals(type) ||
-                Constants.DATABASE_TYPE.DORIS.equals(type) ||
-                Constants.DATABASE_TYPE.STAR_ROCKS.equals(type)) {
-            jdbcUrl = String.format(MYSQL_URL_FORMAT, host, port, dbName);
-        } else if (Constants.DATABASE_TYPE.ORACLE.equals(type)) {
-            JSONObject jsonObject = JSON.parseObject(extConfig);
-            String connectType = jsonObject.getString(Constants.DATABASE_EXT_CONFIG.ORACLE_CONNECT_TYPE);
-            if (connectType != null && connectType.equals(Constants.ORACLE_CONNECT_TYPE.SID)) {
-                jdbcUrl = String.format(ORACLE_SID_URL_FORMAT, host, port, dbName);
-            } else {
-                jdbcUrl = String.format(ORACLE_SERVICE_URL_FORMAT, host, port, dbName);
-            }
-        } else if (Constants.DATABASE_TYPE.POSTGRESQL.equals(type)) {
-            jdbcUrl = String.format(POSTGRESQL_URL_FORMAT, host, port, dbName);
-        } else if (Constants.DATABASE_TYPE.SQL_SERVER.equals(type)) {
-            jdbcUrl = String.format(SQLSERVER_URL_FORMAT, host, port, dbName);
-        } else if (Constants.DATABASE_TYPE.DM8.equals(type)) {
-            jdbcUrl = String.format(DM_URL_FORMAT, host, port, dbName);
+            case Constants.DATABASE_TYPE.ORACLE:
+                JSONObject jsonObject = JSON.parseObject(extConfig);
+                String connectType = jsonObject.getString(Constants.DATABASE_EXT_CONFIG.ORACLE_CONNECT_TYPE);
+                return Constants.ORACLE_CONNECT_TYPE.SID.equals(connectType)
+                        ? String.format(ORACLE_SID_URL_FORMAT, host, port, dbName)
+                        : String.format(ORACLE_SERVICE_URL_FORMAT, host, port, dbName);
+
+            case Constants.DATABASE_TYPE.POSTGRESQL:
+                return String.format(POSTGRESQL_URL_FORMAT, host, port, dbName);
+
+            case Constants.DATABASE_TYPE.SQL_SERVER:
+                return String.format(SQLSERVER_URL_FORMAT, host, port, dbName);
+
+            case Constants.DATABASE_TYPE.DM8:
+                return String.format(DM_URL_FORMAT, host, port, dbName);
+
+            default:
+                throw new IllegalArgumentException("Unsupported database type: " + type);
         }
-
-        return jdbcUrl;
     }
 
     /**
@@ -89,181 +86,129 @@ public class JdbcUtil {
      * @return
      */
     public static String getDriver(String type) {
-        String driverName = null;
+        switch (type) {
+            case Constants.DATABASE_TYPE.MYSQL:
+            case Constants.DATABASE_TYPE.DORIS:
+            case Constants.DATABASE_TYPE.STAR_ROCKS:
+                return MYSQL_DRIVER;
 
-        if (Constants.DATABASE_TYPE.MYSQL.equals(type) ||
-                Constants.DATABASE_TYPE.DORIS.equals(type) ||
-                Constants.DATABASE_TYPE.STAR_ROCKS.equals(type)) {
-            driverName = MYSQL_DRIVER;
-        } else if (Constants.DATABASE_TYPE.ORACLE.equals(type)) {
-            driverName = ORACLE_DRIVER;
-        } else if (Constants.DATABASE_TYPE.POSTGRESQL.equals(type)) {
-            driverName = POSTGRESQL_DRIVER;
-        } else if (Constants.DATABASE_TYPE.SQL_SERVER.equals(type)) {
-            driverName = SQLSERVER_DRIVER;
-        } else if (Constants.DATABASE_TYPE.DM8.equals(type)) {
-            driverName = DM_DRIVER;
+            case Constants.DATABASE_TYPE.ORACLE:
+                return ORACLE_DRIVER;
+
+            case Constants.DATABASE_TYPE.POSTGRESQL:
+                return POSTGRESQL_DRIVER;
+
+            case Constants.DATABASE_TYPE.SQL_SERVER:
+                return SQLSERVER_DRIVER;
+
+            case Constants.DATABASE_TYPE.DM8:
+                return DM_DRIVER;
+
+            default:
+                throw new IllegalArgumentException("Unsupported database type: " + type);
         }
-
-        return driverName;
     }
 
     /**
-     * 获取连接1
-     *
-     * @param driverName
-     * @param url
-     * @param user
-     * @param password
-     * @return
+     * 获取数据库连接（基本方式）
      */
     public static Connection getConnection(String driverName, String url, String user, String password) {
-        Connection conn = null;
-        try {
-            // 加载驱动
-            Class.forName(driverName);
-            DriverManager.setLoginTimeout(10);
-            conn = DriverManager.getConnection(url, user, password);
-            return conn;
-        } catch (Exception e) {
-            logger.error(null, e);
-            throw new ETLException("获取数据库连接失败！");
-        }
-
+        return getConnection(driverName, url, user, password, null);
     }
 
     /**
-     * 获取连接2
-     *
-     * @param driverName
-     * @param url
-     * @param user
-     * @param password
-     * @param schema
-     * @return
+     * 获取数据库连接（带schema）
      */
     public static Connection getConnection(String driverName, String url, String user, String password, String schema) {
-        Connection conn = null;
-        try {
-            // 加载驱动
-            Class.forName(driverName);
-            DriverManager.setLoginTimeout(10);
-            Properties properties = new Properties();
-            properties.put("user", user);
-            properties.put("password", password);
+        Properties properties = new Properties();
+        properties.put("user", user);
+        properties.put("password", password);
+        if (StringUtils.isNotBlank(schema)) {
             properties.put("schema", schema);
-            conn = DriverManager.getConnection(url, properties);
-            return conn;
-        } catch (Exception e) {
-            logger.error(null, e);
-            throw new ETLException("获取数据库连接失败！");
         }
-
+        return createConnection(driverName, url, properties);
     }
 
     /**
-     * 获取连接3
-     *
-     * @param driverName
-     * @param url
-     * @param dbVo
-     * @return
+     * 获取数据库连接（使用DatabaseVo）
      */
     public static Connection getConnection(String driverName, String url, DatabaseVo dbVo) {
-        Connection conn = null;
-        try {
-            // 加载驱动
-            Class.forName(driverName);
-            DriverManager.setLoginTimeout(10);
-            Properties properties = new Properties();
-
-            // 设置用户名、密码
-            properties.put("user", dbVo.getUsername());
-            properties.put("password", dbVo.getPassword());
-
-            // Schema 设置（按数据库类型适配）
-            if (StringUtils.isNotBlank(dbVo.getDbSchema())) {
-                if (Constants.DATABASE_TYPE.POSTGRESQL.equals(dbVo.getType())) {
-                    properties.setProperty("currentSchema", dbVo.getDbSchema());
-                } else {
-                    properties.setProperty("schema", dbVo.getDbSchema());
-                }
-            }
-
-            // mysql类型数据库设置默认连接参数 按照系统情况修改默认参数
-            if (Constants.DATABASE_TYPE.MYSQL.equals(dbVo.getType())
-                    || Constants.DATABASE_TYPE.DORIS.equals(dbVo.getType())) {
-                properties.put("useCursorFetch", "true");
-                properties.put("useSSL", "false");
-                properties.put("useUnicode", "yes");
-                properties.put("characterEncoding", "UTF-8");
-                properties.put("zeroDateTimeBehavior", "convertToNull");
-                properties.put("allowMultiQueries", "true");
-                properties.put("serverTimezone", "Asia/Shanghai");
-                properties.put("useOldAliasMetadataBehavior", "true");
-            }
-
-            if (StringUtils.isNotBlank(dbVo.getProperties())) {
-                HashMap<String, String> hashMap = JSONObject.parseObject(dbVo.getProperties(), HashMap.class);
-                properties.putAll(hashMap);
-            }
-
-            conn = DriverManager.getConnection(url, properties);
-            return conn;
-        } catch (Exception e) {
-            logger.error(null, e);
-            throw new ETLException(e.getMessage());
-        }
-
+        return createConnection(driverName, url, buildConnectionProperties(dbVo, true));
     }
 
+    /**
+     * 获取数据库连接（用于DDL操作）
+     */
     public static Connection getConnectionForDDL(String driverName, String url, DatabaseVo dbVo) {
-        Connection conn = null;
+        Properties properties = buildConnectionProperties(dbVo, false);
+        properties.remove("useCursorFetch"); // DDL操作不需要游标获取
+        return createConnection(driverName, url, properties);
+    }
+
+    /**
+     * 创建数据库连接（核心方法）
+     */
+    private static Connection createConnection(String driverName, String url, Properties properties) {
         try {
-            // 加载驱动
             Class.forName(driverName);
-            DriverManager.setLoginTimeout(10);
-            Properties properties = new Properties();
+            DriverManager.setLoginTimeout(LOGIN_TIMEOUT);
+            return DriverManager.getConnection(url, properties);
+        } catch (ClassNotFoundException e) {
+            String errorMsg = "JDBC driver not found: " + driverName;
+            logger.error(errorMsg, e);
+            throw new ETLException(errorMsg);
+        } catch (SQLException e) {
+            String errorMsg = "Failed to get database connection to: " + url;
+            logger.error(errorMsg, e);
+            throw new ETLException(errorMsg);
+        }
+    }
 
-            // 设置用户名、密码
-            properties.put("user", dbVo.getUsername());
-            properties.put("password", dbVo.getPassword());
+    /**
+     * 构建连接属性
+     */
+    private static Properties buildConnectionProperties(DatabaseVo dbVo, boolean useCursorFetch) {
+        Properties properties = new Properties();
+        properties.put("user", dbVo.getUsername());
+        properties.put("password", dbVo.getPassword());
 
-            // Schema 设置（按数据库类型适配）
-            if (StringUtils.isNotBlank(dbVo.getDbSchema())) {
-                if (Constants.DATABASE_TYPE.POSTGRESQL.equals(dbVo.getType())) {
-                    properties.setProperty("currentSchema", dbVo.getDbSchema());
-                } else {
-                    properties.setProperty("schema", dbVo.getDbSchema());
-                }
-            }
-
-            // mysql类型数据库设置默认连接参数 按照系统情况修改默认参数
-            if (Constants.DATABASE_TYPE.MYSQL.equals(dbVo.getType())
-                    || Constants.DATABASE_TYPE.DORIS.equals(dbVo.getType())) {
-                properties.put("useSSL", "false");
-                properties.put("useUnicode", "yes");
-                properties.put("characterEncoding", "UTF-8");
-                properties.put("zeroDateTimeBehavior", "convertToNull");
-                properties.put("allowMultiQueries", "true");
-                properties.put("serverTimezone", "Asia/Shanghai");
-                properties.put("useOldAliasMetadataBehavior", "true");
-            }
-
-            if (StringUtils.isNotBlank(dbVo.getProperties())) {
-                HashMap<String, String> hashMap = JSONObject.parseObject(dbVo.getProperties(), HashMap.class);
-                properties.putAll(hashMap);
-            }
-
-            properties.remove("useCursorFetch");
-
-            conn = DriverManager.getConnection(url, properties);
-            return conn;
-        } catch (Exception e) {
-            logger.error(null, e);
-            throw new ETLException(e.getMessage());
+        // 设置schema
+        if (StringUtils.isNotBlank(dbVo.getDbSchema())) {
+            String schemaKey = Constants.DATABASE_TYPE.POSTGRESQL.equals(dbVo.getType())
+                    ? "currentSchema" : "schema";
+            properties.setProperty(schemaKey, dbVo.getDbSchema());
         }
 
+        // MySQL类型数据库的特殊配置
+        if (Constants.DATABASE_TYPE.MYSQL.equals(dbVo.getType())
+                || Constants.DATABASE_TYPE.DORIS.equals(dbVo.getType())) {
+            addMysqlDefaultProperties(properties, useCursorFetch);
+        }
+
+        // 添加额外配置属性
+        if (StringUtils.isNotBlank(dbVo.getProperties())) {
+            Map<String, String> extraProps = JSON.parseObject(dbVo.getProperties(), HashMap.class);
+            properties.putAll(extraProps);
+        }
+
+        return properties;
+    }
+
+    /**
+     * 添加MySQL默认连接属性
+     */
+    private static void addMysqlDefaultProperties(Properties properties, boolean useCursorFetch) {
+        properties.put("useSSL", "false");
+        properties.put("useUnicode", "yes");
+        properties.put("characterEncoding", "UTF-8");
+        properties.put("zeroDateTimeBehavior", "convertToNull");
+        properties.put("allowMultiQueries", "true");
+        properties.put("serverTimezone", "Asia/Shanghai");
+        properties.put("useOldAliasMetadataBehavior", "true");
+
+        if (useCursorFetch) {
+            properties.put("useCursorFetch", "true");
+        }
     }
 
 
@@ -277,6 +222,11 @@ public class JdbcUtil {
         }
     }
 
+    /**
+     * 关闭 Connection
+     *
+     * @param conn
+     */
     public static void closeConnection(Connection conn) {
         if (conn != null) {
             try {
@@ -287,6 +237,11 @@ public class JdbcUtil {
         }
     }
 
+    /**
+     * 关闭 Statement
+     *
+     * @param state
+     */
     public static void closeStatement(Statement state) {
         if (state != null) {
             try {
@@ -297,6 +252,11 @@ public class JdbcUtil {
         }
     }
 
+    /**
+     * 关闭 ResultSet
+     *
+     * @param rs
+     */
     public static void closeResultSet(ResultSet rs) {
         if (rs != null) {
             try {
@@ -307,6 +267,11 @@ public class JdbcUtil {
         }
     }
 
+    /**
+     * 提交
+     *
+     * @param conn
+     */
     public static void commit(Connection conn) {
         if (conn != null) {
             try {
@@ -317,6 +282,11 @@ public class JdbcUtil {
         }
     }
 
+    /**
+     * 回滚
+     *
+     * @param conn
+     */
     public static void rollback(Connection conn) {
         if (conn != null) {
             try {

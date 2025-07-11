@@ -2,7 +2,9 @@ package com.etledge.database.db.connector.relationdb;
 
 import com.etledge.common.Constants;
 import com.etledge.database.config.exception.ETLException;
-import com.etledge.database.db.connector.relationdb.*;
+import com.etledge.database.db.connector.relationdb.impl.DorisConnector;
+import com.etledge.database.db.connector.relationdb.impl.MySQLConnector;
+
 /**
  * 数据源连接器工厂
  */
@@ -20,8 +22,8 @@ public class DatabaseConnectorFactory {
 //                return new SqlServerDBConnector();
 //            case Constants.DATABASE_TYPE.DM8:
 //                return new DmDBConnector();
-//            case Constants.DATABASE_TYPE.DORIS:
-//                return new DorisDBConnector();
+            case Constants.DATABASE_TYPE.DORIS:
+                return new DorisConnector();
 //            case Constants.DATABASE_TYPE.STAR_ROCKS:
 //                return new StarRocksDBConnector();
             default:

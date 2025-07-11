@@ -33,9 +33,16 @@ public interface Constants {
      * FTP/FTPS类型
      */
     interface FTP_TYPE {
-        String FTP = "Ftp";
+        String FTP = "FTP";
         String FTPS = "FTPS";
     }
+
+    interface MODE_TYPE {
+        String ACTIVE = "1";
+        String PASSIVE = "2";
+    }
+
+    String FILE_SEPARATOR = "/";
 
     /**
      * 数据类型
@@ -92,13 +99,16 @@ public interface Constants {
         Boolean FALSE = false;
     }
 
+    /**
+     * 树类型
+     */
     interface TREE_TYPE {
         String GROUP = "GROUP";
-        String DATABASE_SOURCE = "DATABASE_SOURCE";
+        String DATABASE = "DATABASE";
     }
 
     /**
-     * redis key
+     * Redis key
      */
     interface REDIS_KEY {
         String CATEGORY = "category";

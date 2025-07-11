@@ -19,9 +19,27 @@ public class TreeVo {
 
     private Integer orderBy;
 
+    /**
+     * 类型
+     */
     private String type;
 
+    /**
+     * 图标
+     */
     private String icon;
 
+    /**
+     * 父级id
+     */
+    private Integer parentId;
+
+    private String treeId;
+
+    private String treeParentId;
+
+    /**
+     * 子级
+     */
     private List<TreeVo> children;
 }

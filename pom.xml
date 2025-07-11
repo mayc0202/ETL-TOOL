@@ -43,6 +43,7 @@
         <mybatis-plus.version>3.5.0</mybatis-plus.version> <!--Mybatis-plus-->
         <lombok.version>1.18.26</lombok.version> <!--Lombok-->
         <fastjson.version>2.0.20</fastjson.version> <!--Fastjson2-->
+        <commons-net.version>3.6</commons-net.version> <!--commons-net.version-->
         <commons-io.version>2.10.0</commons-io.version> <!--commons-io.version-->
         <commons-collections>3.2.2</commons-collections> <!--commons-collections-->
         <commons-lang3.version>3.12.0</commons-lang3.version> <!--commons-lang3-->
@@ -152,6 +153,13 @@
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
                 <version>${lombok.version}</version>
+            </dependency>
+
+            <!-- commons-net -->
+            <dependency>
+                <groupId>commons-net</groupId>
+                <artifactId>commons-net</artifactId>
+                <version>${commons-net.version}</version>
             </dependency>
 
             <!-- io -->

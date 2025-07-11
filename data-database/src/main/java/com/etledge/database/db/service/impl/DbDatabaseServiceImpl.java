@@ -6,11 +6,13 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.etledge.api.upms.UpmsServer;
-import com.etledge.api.upms.vo.UserVo;
+import com.etledge.api.upms.vo.ApiUserVo;
 import com.etledge.common.Constants;
 import com.etledge.common.utils.AESUtil;
 import com.etledge.common.utils.DataUtil;
 import com.etledge.common.utils.RSAUtil;
+import com.etledge.database.db.connector.ftp.AbstractFTPConnector;
+import com.etledge.database.db.connector.ftp.FTPConnectorFactory;
 import com.etledge.database.db.connector.relationdb.DatabaseConnectorFactory;
 import com.etledge.database.db.connector.relationdb.entity.ConResponse;
 import com.etledge.database.dict.service.DictService;
@@ -22,6 +24,7 @@ import com.etledge.database.db.entity.DbGroup;
 import com.etledge.database.db.form.DbDatabaseForm;
 import com.etledge.database.db.service.DbDatabaseService;
 import com.etledge.database.db.vo.DatabaseVo;
+import io.swagger.models.auth.In;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.beans.BeanUtils;
@@ -71,8 +74,8 @@ public class DbDatabaseServiceImpl extends ServiceImpl<DbDatabaseDao, DbDatabase
     @Override
     public IPage<DatabaseVo> list(Integer groupId, Integer dbId, String name, Integer pageNo, Integer pageSize) {
 
-        // TODO 校验token
-        UserVo userInfo = getUserInfo();
+        // 校验token
+        upmsServer.parseToken(getToken());
 
         // 查询出所有分组
         LambdaQueryWrapper<DbGroup> groupLdq = new LambdaQueryWrapper<>();
@@ -129,20 +132,33 @@ public class DbDatabaseServiceImpl extends ServiceImpl<DbDatabaseDao, DbDatabase
     @Override
     public void add(DbDatabaseForm form) {
 
-        UserVo userInfo = getUserInfo();
+        ApiUserVo userInfo = getUserInfo();
 
-        // 校验数据源是否存在
-        verifyDbNameExisted(form.getName());
+        //TODO FTP等数据源不需要数据库名称
+
+        // 校验当前分类下数据源是否存在
+        verifyDbNameExisted(form.getName(), form.getGroupId());
 
         // 密码入库加密
         String decrypt = RSAUtil.decryptByFixedPrivateKeytoString(form.getPassword());
         String pwd = AESUtil.encrypt(decrypt, AESUtil.getAesKey());
 
         DbDatabase dbDatabase = new DbDatabase();
-        BeanUtils.copyProperties(form, dbDatabase,"password");
+        BeanUtils.copyProperties(form, dbDatabase, "password");
         dbDatabase.setPassword(pwd);
         dbDatabase.setCreatedBy(userInfo.getAccount());
         dbDatabase.setCreatedTime(new Date());
+
+        // 处理数据源参数
+        JSONObject properties = new JSONObject();
+        handleProperties(form, properties);
+        dbDatabase.setProperties(properties.toJSONString());
+
+        // 处理扩展配置
+        JSONObject extConfig = new JSONObject();
+        handExtConfig(form,extConfig);
+        dbDatabase.setExtConfig(extConfig.toJSONString());
+
         dbDatabaseDao.insert(dbDatabase);
     }
 
@@ -158,24 +174,37 @@ public class DbDatabaseServiceImpl extends ServiceImpl<DbDatabaseDao, DbDatabase
             throw new ETLException("请校验数据源id是否为空!");
         }
 
-        UserVo userInfo = getUserInfo();
+        ApiUserVo userInfo = getUserInfo();
 
         DbDatabase dbDatabase = getDbDatabaseById(form.getId());
         if (Objects.isNull(dbDatabase)) {
             throw new ETLException("请校验数据源是否存在!");
         }
 
-        // verify data source already exists
-        verifyDbNameExisted(form.getName());
+        //TODO FTP等数据源不需要数据库名称
+
+        // 校验数据源是否已存在
+        verifyDbNameExisted(form.getName(), form.getGroupId());
 
         // 密码入库加密
         String decrypt = RSAUtil.decryptByFixedPrivateKeytoString(form.getPassword());
         String pwd = AESUtil.encrypt(decrypt, AESUtil.getAesKey());
 
-        BeanUtils.copyProperties(form, dbDatabase,"password");
+        BeanUtils.copyProperties(form, dbDatabase, "password");
         dbDatabase.setPassword(pwd);
         dbDatabase.setUpdatedBy(userInfo.getAccount());
         dbDatabase.setUpdatedTime(new Date());
+
+        // 处理数据源参数
+        JSONObject properties = new JSONObject();
+        handleProperties(form, properties);
+        dbDatabase.setProperties(properties.toJSONString());
+
+        // 处理扩展配置
+        JSONObject extConfig = new JSONObject();
+        handExtConfig(form,extConfig);
+        dbDatabase.setExtConfig(extConfig.toJSONString());
+
         dbDatabaseDao.updateById(dbDatabase);
     }
 
@@ -191,7 +220,7 @@ public class DbDatabaseServiceImpl extends ServiceImpl<DbDatabaseDao, DbDatabase
             throw new ETLException("请校验数据源id是否为空!");
         }
 
-        UserVo userInfo = getUserInfo();
+        ApiUserVo userInfo = getUserInfo();
 
         DbDatabase dbDatabase = getDbDatabaseById(id);
 
@@ -215,7 +244,7 @@ public class DbDatabaseServiceImpl extends ServiceImpl<DbDatabaseDao, DbDatabase
 
         DbDatabase dbDatabase = getDbDatabaseById(id);
         DatabaseVo databaseVo = new DatabaseVo();
-        BeanUtils.copyProperties(dbDatabase,databaseVo,"password");
+        BeanUtils.copyProperties(dbDatabase, databaseVo, "password");
 
         // AES解密再RSA加密
         try {
@@ -224,7 +253,7 @@ public class DbDatabaseServiceImpl extends ServiceImpl<DbDatabaseDao, DbDatabase
             databaseVo.setPassword(pwd);
         } catch (Exception e) {
             e.printStackTrace();
-            throw new ETLException(String.format("数据源[%s]密码解密失败!",dbDatabase.getDbName()));
+            throw new ETLException(String.format("数据源[%s]密码解密失败!", dbDatabase.getDbName()));
         }
 
         return databaseVo;
@@ -245,7 +274,11 @@ public class DbDatabaseServiceImpl extends ServiceImpl<DbDatabaseDao, DbDatabase
             case Constants.DATABASE_TYPE.DM8:
             case Constants.DATABASE_TYPE.DORIS:
             case Constants.DATABASE_TYPE.STAR_ROCKS:
-                testDatabaseConnection(form, null);
+                connectDatabase(form, null);
+                break;
+            case Constants.FTP_TYPE.FTP:
+            case Constants.FTP_TYPE.FTPS:
+                connectFTP(form);
                 break;
             case Constants.DATABASE_TYPE.REDIS:
                 break;
@@ -259,11 +292,11 @@ public class DbDatabaseServiceImpl extends ServiceImpl<DbDatabaseDao, DbDatabase
     }
 
     /**
-     * 测试数据库连接
+     * 连接数据库
      *
      * @param form
      */
-    public void testDatabaseConnection(DbDatabaseForm form, String properties) {
+    public void connectDatabase(DbDatabaseForm form, String properties) {
 
         // 单独校验schema
         if ((Constants.DATABASE_TYPE.ORACLE.equals(form.getType()) ||
@@ -293,32 +326,53 @@ public class DbDatabaseServiceImpl extends ServiceImpl<DbDatabaseDao, DbDatabase
             connector.setPort(Integer.parseInt(form.getDbPort()));
         }
         connector.setSchema(form.getDbSchema());
-        Map<String, Object> map = new HashMap<>();
 
-        handleProperties(form, map);
+        // 处理参数
+        JSONObject param = new JSONObject();
+        handleProperties(form, param);
 
         //获取数据库中已保存的properties
         if (StringUtils.isNotBlank(properties)) {
             connector.setProperties(properties);
         } else {
-            connector.setProperties(JSONObject.toJSONString(map));
+            connector.setProperties(param.toJSONString());
         }
 
-        Map<String, Object> extConfigMap = new HashMap<>();
-        setExtConfigProperties(form, extConfigMap);
-        connector.setExtConfig(JSONObject.toJSONString(extConfigMap));
+        JSONObject extConfig = new JSONObject();
+        handExtConfig(form, extConfig);
+        connector.setExtConfig(extConfig.toJSONString());
+
         connector.setType(form.getType());
 
         connector.build();
-        ConResponse response = connector.test(form.getType());
+        ConResponse response = connector.connect(form.getType());
 
-        // 判断TestResponse的标识，如果为false，则抛出异常
+        // 判断ConResponse的标识，如果为false，则抛出异常
         if (!response.getResult()) {
             throw new ETLException(response.getMsg());
         }
     }
 
-    private void handleProperties(DbDatabaseForm form, Map<String, Object> map) {
+    /**
+     * 处理参数
+     *
+     * @param form
+     * @param properties
+     */
+    private void handleProperties(DbDatabaseForm form, JSONObject properties) {
+
+        if (StringUtils.isNotBlank(form.getMode())) {
+            properties.put("mode", form.getMode());
+        }
+
+        if (StringUtils.isNotBlank(form.getControlEncoding())) {
+            properties.put("controlEncoding", form.getControlEncoding());
+        }
+
+//        String properties = form.getProperties();
+
+//        String extConfig = form.getExtConfig();
+
 //        if (null != form.getUseSSL()) {
 //            map.put("useSSL", form.getUseSSL());
 //        }
@@ -368,22 +422,36 @@ public class DbDatabaseServiceImpl extends ServiceImpl<DbDatabaseDao, DbDatabase
 //        }
     }
 
-    private void setExtConfigProperties(DbDatabaseForm form, Map<String, Object> map) {
-//        if (null != form.getFeAddress()) {
-//            map.put("feAddress", form.getFeAddress());
-//        }
-//        if (null != form.getBeAddress()) {
-//            map.put("beAddress", form.getBeAddress());
-//        }
-//        if (null != form.getConnectType() && !"".equals(form.getConnectType())) {
-//            map.put("connectType", form.getConnectType());
-//        }
-//        if (StringUtils.isNotBlank(form.getAccessKey())) {
-//            map.put("accessKey", form.getAccessKey());
-//        }
-//        if (StringUtils.isNotBlank(form.getSecretKey())) {
-//            map.put("secretKey", form.getSecretKey());
-//        }
+    /**
+     * 处理扩展配置
+     *
+     * @param form
+     * @param extConfig
+     */
+    private void handExtConfig(DbDatabaseForm form, JSONObject extConfig) {
+        if (StringUtils.isNotBlank(form.getFeAddress())) {
+            extConfig.put("feAddress", form.getFeAddress());
+        }
+
+        if (StringUtils.isNotBlank(form.getBeAddress())) {
+            extConfig.put("beAddress", form.getBeAddress());
+        }
+    }
+
+    /**
+     * 连接FTP/FTPS
+     *
+     * @param form
+     */
+    private void connectFTP(DbDatabaseForm form) {
+        AbstractFTPConnector connector = FTPConnectorFactory.getConnector(form.getType());
+        connector.setHost(form.getDbHost());
+        connector.setPort(Integer.parseInt(form.getDbPort()));
+        connector.setUsername(form.getUsername());
+        connector.setPassword(form.getPassword());
+        connector.setMode(form.getMode());
+        connector.setControlEncoding(form.getControlEncoding());
+        connector.connect();
     }
 
     /**
@@ -391,9 +459,10 @@ public class DbDatabaseServiceImpl extends ServiceImpl<DbDatabaseDao, DbDatabase
      *
      * @param name
      */
-    private void verifyDbNameExisted(String name) {
+    private void verifyDbNameExisted(String name, Integer groupId) {
         LambdaQueryWrapper<DbDatabase> ldq = new LambdaQueryWrapper<>();
         ldq.eq(DbDatabase::getDbName, name)
+                .eq(DbDatabase::getGroupId, groupId)
                 .eq(DbDatabase::getDeleted, Constants.DELETE_FLAG.FALSE);
         DbDatabase database = dbDatabaseDao.selectOne(ldq);
         if (Objects.nonNull(database)) {
@@ -408,9 +477,11 @@ public class DbDatabaseServiceImpl extends ServiceImpl<DbDatabaseDao, DbDatabase
      * @return
      */
     private DbDatabase getDbDatabaseById(Integer id) {
+
         LambdaQueryWrapper<DbDatabase> ldq = new LambdaQueryWrapper<>();
         ldq.eq(DbDatabase::getId, id)
                 .eq(DbDatabase::getDeleted, Constants.DELETE_FLAG.FALSE);
+
         DbDatabase database = dbDatabaseDao.selectOne(ldq);
         if (Objects.isNull(database)) {
             throw new ETLException("请校验数据源是否已存在!");
@@ -424,20 +495,16 @@ public class DbDatabaseServiceImpl extends ServiceImpl<DbDatabaseDao, DbDatabase
      *
      * @return
      */
-    private UserVo getUserInfo() {
+    private ApiUserVo getUserInfo() {
 
         // 获取token
         String token = getToken();
-        UserVo userInfo = null;
+        ApiUserVo userInfo = null;
         try {
             userInfo = upmsServer.getUserInfo(token);
         } catch (Exception e) {
             e.printStackTrace();
             throw new ETLException(e.getMessage());
-        }
-
-        if (Objects.isNull(userInfo)) {
-            throw new ETLException("请校验用户信息是否为空!");
         }
 
         return userInfo;

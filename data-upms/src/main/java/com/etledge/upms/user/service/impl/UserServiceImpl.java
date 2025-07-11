@@ -59,7 +59,7 @@ public class UserServiceImpl extends ServiceImpl<UserDao, User> implements UserS
     private RoleDao roleDao;
 
     /**
-     * Login
+     * 登录
      *
      * @param loginInfo
      * @return
@@ -67,7 +67,7 @@ public class UserServiceImpl extends ServiceImpl<UserDao, User> implements UserS
     @Override
     public String login(LoginInfoForm loginInfo) {
 
-        // 1.verify if the user exists
+        // 1.校验用户是否存在
         LambdaQueryWrapper<User> ldq = new LambdaQueryWrapper<>();
         ldq.eq(User::getAccount, loginInfo.getUsername())
                 .eq(User::getDeleted, Constants.DELETE_FLAG.FALSE);
@@ -76,7 +76,7 @@ public class UserServiceImpl extends ServiceImpl<UserDao, User> implements UserS
             throw new ETLException(String.format("Please verify if the current [%s] user exists!", loginInfo.getUsername()));
         }
 
-        // 2.password verifiers
+        // 2.密码校验
         try {
             String aesPwd = AESUtil.decrypt(user.getPassword(), AESUtil.getAesKey());
             String rsaPwd = RSAUtil.decryptByFixedPrivateKeytoString(loginInfo.getPassword());
@@ -90,31 +90,31 @@ public class UserServiceImpl extends ServiceImpl<UserDao, User> implements UserS
             throw new ETLException("Password error, please log in again!");
         }
 
-        // 3.create token
+        // 3.创建token
         String token = jwtConfig.createToken(user.getId(), user.getAccount());
 
-        // 4.record login status
+        // 4.记录登录状态
         afterLoginSuccess(user.getId(), token);
 
-        // 5.return token
+        // 5.返回token
         token = Constants.ETL_EDGE_TOKEN_CONFIG.BEARER_PREFIX + token;
         return token;
     }
 
     /**
-     * Get user information
+     * 获取用户信息
      *
      * @return
      */
     @Override
     public UserVo getUserInfo(String token) {
 
-        // verify token
+        // 校验token
         if (StringUtils.isBlank(token)) {
             token = getToken();
         }
 
-        // parse token
+        // 解析token
         Claims body = null;
         try {
             Jws<Claims> claims = jwtConfig.parseToken(token);
@@ -122,37 +122,37 @@ public class UserServiceImpl extends ServiceImpl<UserDao, User> implements UserS
         } catch (Exception e) {
             e.printStackTrace();
             logger.error("解析Token异常: {}", token, e);
-            throw new ETLException("The token is invalid or has expired!");
+            throw new ETLException("令牌无效或已过期!");
         }
 
         if (Objects.isNull(body.get("userId"))) {
-            throw new ETLException("Please verify if the userId in the token is empty!");
+            throw new ETLException("请验证令牌中的userId是否为空!");
         }
         Integer userId = Integer.valueOf(body.get("userId").toString());
 
         if (Objects.isNull(body.get("account"))) {
-            throw new ETLException("Please verify if the account in the token is empty!");
+            throw new ETLException("请验证令牌中的帐户是否为空!");
         }
         String account = String.valueOf(body.get("account"));
 
-        // verify userInfo is empty
+        // 校验用户信息是否为空
         LambdaQueryWrapper<User> lqd = new LambdaQueryWrapper<>();
         lqd.eq(User::getId,userId)
                 .eq(User::getAccount,account)
                 .eq(User::getDeleted,Constants.DELETE_FLAG.FALSE);
         User user = userDao.selectOne(lqd);
         if (Objects.isNull(user)) {
-            throw new ETLException("Please verify if the user is empty!");
+            throw new ETLException("请验证用户是否为空!");
         }
 
-        // search userInfo
+        // 查询用户角色
         List<RoleVo> roleVos = roleDao.getRoleListByUserId(userId);
         if (roleVos.isEmpty()) {
-            throw new ETLException("Please verify if the user role is empty!");
+            throw new ETLException("请验证用户角色是否为空!");
         }
         Set<String> roleList = roleVos.stream().map(RoleVo::getRoleName).collect(Collectors.toSet());
 
-        // copy
+        // 复制
         UserVo userVo = new UserVo();
         BeanUtils.copyProperties(user,userVo);
         userVo.setRoles(roleList);
@@ -161,7 +161,7 @@ public class UserServiceImpl extends ServiceImpl<UserDao, User> implements UserS
     }
 
     /**
-     * Save Redis when logging in
+     * 登录成功后置操作
      *
      * @param userId
      * @param newToken
@@ -208,7 +208,7 @@ public class UserServiceImpl extends ServiceImpl<UserDao, User> implements UserS
     }
 
     /**
-     * Refresh token
+     * 刷新token
      *
      * @param oldToken
      * @return
@@ -221,7 +221,7 @@ public class UserServiceImpl extends ServiceImpl<UserDao, User> implements UserS
             return oldToken;
         }
 
-        // create new token
+        // 创建新的token
         Integer userId = claims.get("uid", Integer.class);
         String account = claims.getSubject();
         String newToken = jwtConfig.createToken(userId, account);
@@ -233,7 +233,7 @@ public class UserServiceImpl extends ServiceImpl<UserDao, User> implements UserS
     }
 
     /**
-     * Logout
+     * 注销用户
      *
      */
     @Override
@@ -261,7 +261,7 @@ public class UserServiceImpl extends ServiceImpl<UserDao, User> implements UserS
     }
 
     /**
-     * Get token
+     * 获取token
      *
      * @return
      */
@@ -278,7 +278,7 @@ public class UserServiceImpl extends ServiceImpl<UserDao, User> implements UserS
         }
 
         if (StringUtils.isBlank(token)) {
-            throw new ETLException("Please verify if the token is empty!");
+            throw new ETLException("请校验token是否为空!");
         }
 
         return token;

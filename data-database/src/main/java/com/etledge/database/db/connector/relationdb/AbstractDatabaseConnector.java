@@ -25,27 +25,59 @@ public abstract class AbstractDatabaseConnector {
 
     public Logger logger = LoggerFactory.getLogger(AbstractDatabaseConnector.class);
 
-    // 主机
+    /**
+     * 主机
+     */
     private String host;
-    // 端口
+
+    /**
+     * 端口
+     */
     private Integer port;
-    // 用户
+
+    /**
+     * 用户
+     */
     private String username;
-    // 密码
+
+    /**
+     * 密码
+     */
     private String password;
-    // 数据源类型
+
+    /**
+     * 数据源类型
+     */
     private String type;
-    // 数据库名称
+
+    /**
+     * 数据库名称
+     */
     private String dbName;
-    // 模式
+
+    /**
+     * 模式
+     */
     private String schema;
-    // 驱动类
+
+    /**
+     * 驱动类
+     */
     private String driver;
-    // url
+
+    /**
+     * url
+     */
     private String url;
-    // 配置
+
+    /**
+     * 配置
+     */
     private String properties;
-    // 扩展配置
+
+    /**
+     * 扩展配置
+     */
     private String extConfig;
 
 
@@ -139,28 +171,12 @@ public abstract class AbstractDatabaseConnector {
 //    }
 
     /**
-     * 封装数据源信息
-     *
-     * @return
-     */
-    public DatabaseVo getDatabaseVo() {
-        DatabaseVo dbVo = new DatabaseVo();
-        dbVo.setUsername(username);
-        dbVo.setPassword(password);
-        dbVo.setType(type);
-        dbVo.setDbSchema(schema);
-        dbVo.setProperties(properties);
-        dbVo.setExtConfig(extConfig);
-        return dbVo;
-    }
-
-    /**
      * 测试连接
      *
      * @param dbType
      * @return
      */
-    public ConResponse test(String dbType) {
+    public ConResponse connect(String dbType) {
         Connection conn = null;
         Statement stat = null;
         ConResponse response = new ConResponse();
@@ -207,4 +223,21 @@ public abstract class AbstractDatabaseConnector {
 
         return response;
     }
+
+    /**
+     * 封装数据源信息
+     *
+     * @return
+     */
+    public DatabaseVo getDatabaseVo() {
+        DatabaseVo dbVo = new DatabaseVo();
+        dbVo.setUsername(username);
+        dbVo.setPassword(password);
+        dbVo.setType(type);
+        dbVo.setDbSchema(schema);
+        dbVo.setProperties(properties);
+        dbVo.setExtConfig(extConfig);
+        return dbVo;
+    }
+
 }

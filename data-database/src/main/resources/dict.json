@@ -1,32 +1,102 @@
 [
   {
     "dictCode": "data_source_layering",
-    "name" : "数据源分层",
-    "list" : [
+    "name": "数据源分层",
+    "list": [
       {
         "code": "来源库SRC",
         "value": "1",
         "order": 1,
         "description": ""
-      },{
+      },
+      {
         "code": "贴源库ODS",
         "value": "2",
         "order": 2,
         "description": ""
-      },{
+      },
+      {
         "code": "治理库DW",
         "value": "3",
         "order": 3,
         "description": ""
-      },{
+      },
+      {
         "code": "应用库ADS",
         "value": "4",
         "order": 4,
         "description": ""
-      },{
+      },
+      {
         "code": "共享库DS",
         "value": "5",
         "order": 5,
+        "description": ""
+      }
+    ]
+  },
+  {
+    "dictCode": "ftp_style",
+    "name": "FTP协议类型",
+    "list": [
+      {
+        "code": "FTP",
+        "value": "1",
+        "order": 1,
+        "description": ""
+      },
+      {
+        "code": "FTPS",
+        "value": "2",
+        "order": 2,
+        "description": ""
+      }
+    ]
+  },
+  {
+    "dictCode": "ftp_mode",
+    "name": "FTP模式",
+    "list": [
+      {
+        "code": "主动模式",
+        "value": "1",
+        "order": 1,
+        "description": ""
+      },
+      {
+        "code": "被动模式",
+        "value": "2",
+        "order": 2,
+        "description": ""
+      }
+    ]
+  },
+  {
+    "dictCode": "control_encoding",
+    "name": "控制编码类型",
+    "list": [
+      {
+        "code": "UTF-8",
+        "value": "1",
+        "order": 1,
+        "description": ""
+      },
+      {
+        "code": "GB2312",
+        "value": "2",
+        "order": 2,
+        "description": ""
+      },
+      {
+        "code": "GBK",
+        "value": "3",
+        "order": 3,
+        "description": ""
+      },
+      {
+        "code": "ISO-8859-1",
+        "value": "4",
+        "order": 4,
         "description": ""
       }
     ]

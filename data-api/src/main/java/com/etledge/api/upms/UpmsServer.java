@@ -1,6 +1,6 @@
 package com.etledge.api.upms;
 
-import com.etledge.api.upms.vo.UserVo;
+import com.etledge.api.upms.vo.ApiUserVo;
 
 /**
  * User Service
@@ -8,10 +8,17 @@ import com.etledge.api.upms.vo.UserVo;
 public interface UpmsServer {
 
     /**
-     * Get user information
+     * 获取用户信息
      *
      * @param token
      * @return
      */
-    UserVo getUserInfo(String token);
+    ApiUserVo getUserInfo(String token);
+
+    /**
+     * 解析token
+     *
+     * @param token
+     */
+    void parseToken(String token);
 }

@@ -13,8 +13,11 @@ import java.util.Set;
  * @Version: 1.0
  */
 @Data
-public class UserVo implements Serializable {
+public class ApiUserVo implements Serializable {
 
+    /**
+     * 用户Id
+     */
     private Integer id;
 
     /**

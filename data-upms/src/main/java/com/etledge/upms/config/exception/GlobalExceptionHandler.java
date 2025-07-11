@@ -56,10 +56,6 @@ public class GlobalExceptionHandler {
             return handleMethodArgumentNotValidException((MethodArgumentNotValidException) e);
         } else if (e instanceof HttpRequestMethodNotSupportedException) {
             return RtnData.fail("Unsupported request method: " + e.getMessage());
-        } else if (e instanceof MissingServletRequestParameterException
-                || e instanceof ServletRequestBindingException
-                || e instanceof MissingServletRequestPartException) {
-            return RtnData.fail("Required parameter missing: " + e.getMessage());
         } else if (e instanceof HttpMessageNotReadableException) {
             return RtnData.fail("Request body parsing failed: " + e.getMessage());
         } else if (e instanceof UnsupportedEncodingException) {

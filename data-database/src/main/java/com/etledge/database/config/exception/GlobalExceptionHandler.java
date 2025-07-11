@@ -19,6 +19,7 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
+import java.net.SocketTimeoutException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -56,8 +57,7 @@ public class GlobalExceptionHandler {
             return handleMethodArgumentNotValidException((MethodArgumentNotValidException) e);
         } else if (e instanceof HttpRequestMethodNotSupportedException) {
             return RtnData.fail("Unsupported request method: " + e.getMessage());
-        } else if (e instanceof MissingServletRequestParameterException
-                || e instanceof ServletRequestBindingException
+        } else if (e instanceof ServletRequestBindingException
                 || e instanceof MissingServletRequestPartException) {
             return RtnData.fail("Required parameter missing: " + e.getMessage());
         } else if (e instanceof HttpMessageNotReadableException) {
@@ -70,6 +70,8 @@ public class GlobalExceptionHandler {
             return RtnData.fail("SQLException : " + e.getMessage());
         } else if (e instanceof DataIntegrityViolationException) {
             return RtnData.fail("Data Integrity Violation Exception : " + e.getMessage());
+        }  else if (e instanceof SocketTimeoutException) {
+            return RtnData.fail("Dubbo Service Exception : " + e.getMessage());
         } else {
             return RtnData.fail(SYSTEM_ERROR_MSG);
         }

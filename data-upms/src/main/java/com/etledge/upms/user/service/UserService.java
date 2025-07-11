@@ -14,7 +14,7 @@ import com.etledge.upms.user.vo.UserVo;
 public interface UserService extends IService<User> {
 
     /**
-     * Login
+     * 登录用户
      *
      * @param loginInfo
      * @return
@@ -22,7 +22,7 @@ public interface UserService extends IService<User> {
     String login(LoginInfoForm loginInfo);
 
     /**
-     * Get user information
+     * 获取用户信息
      *
      * @param token
      * @return
@@ -30,7 +30,7 @@ public interface UserService extends IService<User> {
     UserVo getUserInfo(String token);
 
     /**
-     * Logout
+     * 注销账户
      */
     void logout();
 

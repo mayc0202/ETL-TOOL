@@ -1,7 +1,8 @@
-package com.etledge.database.db.connector.relationdb;
+package com.etledge.database.db.connector.relationdb.impl;
 
 import com.etledge.common.Constants;
 import com.etledge.database.config.exception.ETLException;
+import com.etledge.database.db.connector.relationdb.AbstractDatabaseConnector;
 import com.etledge.database.db.connector.util.JdbcUtil;
 
 import java.sql.Connection;
@@ -48,12 +49,15 @@ public class MySQLConnector extends AbstractDatabaseConnector {
             "GROUP BY TABLE_NAME,INDEX_NAME,NON_UNIQUE";
 
 
+    /**
+     * 构造连接器
+     *
+     * @return
+     */
     @Override
     public AbstractDatabaseConnector build() {
-
-        setDriver(JdbcUtil.getDriver(Constants.DATABASE_TYPE.MYSQL));
-        setUrl(JdbcUtil.getUrl(Constants.DATABASE_TYPE.MYSQL, getHost(), String.valueOf(getPort()), getDbName(), getExtConfig()));
-
+        this.setDriver(JdbcUtil.getDriver(Constants.DATABASE_TYPE.MYSQL));
+        this.setUrl(JdbcUtil.getUrl(Constants.DATABASE_TYPE.MYSQL, getHost(), String.valueOf(getPort()), getDbName(), getExtConfig()));
         return this;
     }
 

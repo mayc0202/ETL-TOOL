@@ -48,7 +48,7 @@ public class DbDatabaseForm {
     @ApiModelProperty(value = "端口", name = "dbPort", example = "8080")
     private String dbPort;
 
-    @NotBlank(message = "数据库名称/SID不能为空!")
+//    @NotBlank(message = "数据库名称/SID不能为空!")
     @ApiModelProperty(value = "数据库名称/SID", name = "dbName", example = "db_student")
     private String dbName;
 
@@ -87,6 +87,12 @@ public class DbDatabaseForm {
 
     @ApiModelProperty(value = "连接方式", name = "connectType", example = "127.0.0.1:9030")
     private String connectType;
+
+    @ApiModelProperty(value = "控制编码", name = "controlEncoding", example = "UTF-8")
+    private String controlEncoding;
+
+    @ApiModelProperty(value = "FTP主动/被动模式", name = "ftpMode", example = "2")
+    private String mode;
 
 //    private Boolean useSSL;
 //

@@ -45,6 +45,12 @@
             <artifactId>org.apache.commons.codec</artifactId>
         </dependency>
 
+        <!-- commons-net -->
+        <dependency>
+            <groupId>commons-net</groupId>
+            <artifactId>commons-net</artifactId>
+        </dependency>
+
         <!-- commons-lang3 -->
         <dependency>
             <groupId>org.apache.commons</groupId>

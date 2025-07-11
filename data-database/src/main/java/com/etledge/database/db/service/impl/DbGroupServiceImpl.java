@@ -3,18 +3,18 @@ package com.etledge.database.db.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.etledge.api.upms.UpmsServer;
-import com.etledge.api.upms.vo.UserVo;
+import com.etledge.api.upms.vo.ApiUserVo;
 import com.etledge.common.Constants;
 import com.etledge.database.config.exception.ETLException;
 import com.etledge.database.db.dao.DbBasicDao;
 import com.etledge.database.db.dao.DbDatabaseDao;
 import com.etledge.database.db.dao.DbGroupDao;
-import com.etledge.database.db.entity.DbBasic;
 import com.etledge.database.db.entity.DbDatabase;
 import com.etledge.database.db.entity.DbGroup;
 import com.etledge.database.db.form.DbGroupForm;
 import com.etledge.database.db.service.DbGroupService;
 import com.etledge.database.db.vo.TreeVo;
+import io.swagger.models.auth.In;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.beans.BeanUtils;
@@ -72,19 +72,11 @@ public class DbGroupServiceImpl extends ServiceImpl<DbGroupDao, DbGroup> impleme
     public List<TreeVo> tree(String name) {
 
         // TODO 调用upms系统接口，解析cooike中的token，获取对应的角色权限，再做筛选
-        UserVo userInfo = getUserInfo();
+        ApiUserVo userInfo = getUserInfo();
         Set<String> roles = userInfo.getRoles();
 
-        LambdaQueryWrapper<DbGroup> groupQuery = new LambdaQueryWrapper<>();
-        groupQuery.eq(DbGroup::getDeleted, Constants.DELETE_FLAG.FALSE)
-                .orderByAsc(DbGroup::getOrderBy);
-
-        if (StringUtils.isNotBlank(name)) {
-            groupQuery.like(DbGroup::getName, name);
-        }
-
-
-        List<DbGroup> dbGroups = dbGroupDao.selectList(groupQuery);
+        // 获取所有分组
+        List<DbGroup> dbGroups = getAllDbGroup(name);
         if (dbGroups.isEmpty()) {
             return Collections.emptyList();
         }
@@ -120,7 +112,7 @@ public class DbGroupServiceImpl extends ServiceImpl<DbGroupDao, DbGroup> impleme
                         child.setId(db.getId());
                         child.setIcon(CACHE_ICON.get(db.getType())); // deal icon
                         child.setName(db.getName());
-                        child.setType(Constants.TREE_TYPE.DATABASE_SOURCE);
+                        child.setType(Constants.TREE_TYPE.DATABASE);
                         return child;
                     })
                     .collect(Collectors.toList());
@@ -139,14 +131,14 @@ public class DbGroupServiceImpl extends ServiceImpl<DbGroupDao, DbGroup> impleme
     @Override
     public void add(DbGroupForm form) {
 
-        UserVo userInfo = getUserInfo();
+        ApiUserVo userInfo = getUserInfo();
 
         LambdaQueryWrapper<DbGroup> ldq = new LambdaQueryWrapper<>();
         ldq.eq(DbGroup::getName, form.getName())
                 .eq(DbGroup::getDeleted, Constants.DELETE_FLAG.FALSE);
         DbGroup dbGroup = dbGroupDao.selectOne(ldq);
         if (Objects.nonNull(dbGroup)) {
-            throw new ETLException(String.format("Group name [%s] already exists!", form.getName()));
+            throw new ETLException(String.format("分组名称【%s】已存在!", form.getName()));
         }
 
         DbGroup group = new DbGroup();
@@ -167,17 +159,17 @@ public class DbGroupServiceImpl extends ServiceImpl<DbGroupDao, DbGroup> impleme
     @Override
     public void update(DbGroupForm form) {
 
-        UserVo userInfo = getUserInfo();
+        ApiUserVo userInfo = getUserInfo();
 
         LambdaQueryWrapper<DbGroup> ldq1 = new LambdaQueryWrapper<>();
         ldq1.eq(DbGroup::getId, form.getId())
                 .eq(DbGroup::getDeleted, Constants.DELETE_FLAG.FALSE);
         DbGroup group = dbGroupDao.selectOne(ldq1);
         if (Objects.isNull(group)) {
-            throw new ETLException("Please verify if the grouping exists!");
+            throw new ETLException("请校验分组是否存在!");
         }
 
-        // verify if the group exists
+        // 校验分组名称是否已存在
         verifyGroupIsExists(form.getName());
 
         group.setName(form.getName());
@@ -196,18 +188,18 @@ public class DbGroupServiceImpl extends ServiceImpl<DbGroupDao, DbGroup> impleme
     @Override
     public void delete(Integer id) {
 
-        UserVo userInfo = getUserInfo();
+        ApiUserVo userInfo = getUserInfo();
 
         LambdaQueryWrapper<DbGroup> groupQueryWrapper = new LambdaQueryWrapper<>();
         groupQueryWrapper.eq(DbGroup::getId, id)
                 .eq(DbGroup::getDeleted, Constants.DELETE_FLAG.FALSE);
         DbGroup group = dbGroupDao.selectOne(groupQueryWrapper);
         if (Objects.isNull(group)) {
-            throw new ETLException("Please verify if the grouping exists!");
+            throw new ETLException("请校验分组是否存在!");
         }
 
-        // Verify whether there is a data source under the group
-        LambdaQueryWrapper<DbDatabase> dbQueryWrapper = new LambdaQueryWrapper<>();
+        // 校验分组下存在数据源不能删除
+        verifyGroupHasDatabase(id);
 
         group.setDeleted(Constants.DELETE_FLAG.TRUE);
         group.setUpdatedBy(userInfo.getAccount());
@@ -215,45 +207,72 @@ public class DbGroupServiceImpl extends ServiceImpl<DbGroupDao, DbGroup> impleme
         dbGroupDao.updateById(group);
     }
 
-    private DbGroup getDbGroup(Integer id) {
+    /**
+     * 校验分组下是否存在数据源
+     *
+     * @param groupId
+     */
+    private void verifyGroupHasDatabase(Integer groupId) {
+        LambdaQueryWrapper<DbDatabase> ldq = new LambdaQueryWrapper<>();
+        ldq.eq(DbDatabase::getGroupId, groupId)
+                .eq(DbDatabase::getDeleted, Constants.DELETE_FLAG.FALSE);
 
-        return null;
+        List<DbDatabase> list = dbDatabaseDao.selectList(ldq);
+        if (!list.isEmpty()) {
+            throw new ETLException("当前分组下存在数据源!");
+        }
     }
 
     /**
-     * Verify if the group exists
+     * 校验分组是否存在
      *
      * @param name
      */
     private void verifyGroupIsExists(String name) {
-        LambdaQueryWrapper<DbGroup> ldq2 = new LambdaQueryWrapper<>();
-        ldq2.eq(DbGroup::getName, name)
+        LambdaQueryWrapper<DbGroup> ldq = new LambdaQueryWrapper<>();
+        ldq.eq(DbGroup::getName, name)
                 .eq(DbGroup::getDeleted, Constants.DELETE_FLAG.FALSE);
-        DbGroup dbGroup = dbGroupDao.selectOne(ldq2);
-        if (Objects.nonNull(dbGroup)) {
-            throw new ETLException(String.format("Group name [%s] already exists!", name));
+
+        DbGroup group = dbGroupDao.selectOne(ldq);
+        if (Objects.nonNull(group)) {
+            throw new ETLException(String.format("分组名称【%s】已存在!", name));
         }
     }
 
     /**
-     * Get user information
+     * 获取所有数据源分组
+     *
+     * @param name
+     * @return
+     */
+    private List<DbGroup> getAllDbGroup(String name) {
+
+        LambdaQueryWrapper<DbGroup> ldq = new LambdaQueryWrapper<>();
+        ldq.eq(DbGroup::getDeleted, Constants.DELETE_FLAG.FALSE)
+                .orderByAsc(DbGroup::getOrderBy);
+
+        if (StringUtils.isNotBlank(name)) {
+            ldq.like(DbGroup::getName, name);
+        }
+
+        return dbGroupDao.selectList(ldq);
+    }
+
+    /**
+     * 获取用户信息
      *
      * @return
      */
-    private UserVo getUserInfo() {
+    private ApiUserVo getUserInfo() {
 
         // 获取token
         String token = getToken();
-        UserVo userInfo = null;
+        ApiUserVo userInfo = null;
         try {
             userInfo = upmsServer.getUserInfo(token);
-        } catch (ETLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             throw new ETLException(e.getMessage());
-        }
-
-        if (Objects.isNull(userInfo)) {
-            throw new ETLException("Please verify if the user is empty!");
         }
 
         return userInfo;
@@ -261,7 +280,7 @@ public class DbGroupServiceImpl extends ServiceImpl<DbGroupDao, DbGroup> impleme
 
 
     /**
-     * Get token
+     * 获取token
      *
      * @return
      */
@@ -278,7 +297,7 @@ public class DbGroupServiceImpl extends ServiceImpl<DbGroupDao, DbGroup> impleme
         }
 
         if (StringUtils.isBlank(token)) {
-            throw new ETLException("Please verify if the token is empty!");
+            throw new ETLException("请校验token是否为空!");
         }
 
         return token;
